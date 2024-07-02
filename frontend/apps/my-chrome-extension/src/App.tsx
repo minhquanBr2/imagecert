@@ -11,22 +11,23 @@ const App: React.FC = () => {
   // const nav = useNavigate();
   const [tab, setTab] = React.useState(0);
   const handleSignIn = () => {
-    UserServices.authorizeGoogle().then((result) => {
-      if (result.status === 1) {
-        console.log('User signed in:', result.user);
-        UserServices.addNewUser({firebaseUID: result.user.uid, publicKey: "publicKey", role: "role"}).then((result) => {
-          toast.success('User added to database');
-          setTab(1);
-        }).catch((error) => {
-          console.error('Error adding user to database:', error);
-          toast.error('Error adding user to database');
-        });
+    // UserServices.authorizeGoogle().then((result) => {
+    //   if (result.status === 1) {
+    //     console.log('User signed in:', result.user);
+    //     UserServices.addNewUser({firebaseUID: result.user.uid, publicKey: "publicKey", role: "role"}).then((result) => {
+    //       toast.success('User added to database');
+    //       setTab(1);
+    //     }).catch((error) => {
+    //       console.error('Error adding user to database:', error);
+    //       toast.error('Error adding user to database');
+    //     });
         
-      } else {
-        console.error('Error signing in:', result.errorMessage);
-        toast.error('Error signing in');
-      }
-    });
+    //   } else {
+    //     console.error('Error signing in:', result.errorMessage);
+    //     toast.error('Error signing in');
+    //   }
+    // });
+    console.log("Sign in with Google", localStorage.getItem("token"));
   };
   useEffect(() => {
     console.log(tab);

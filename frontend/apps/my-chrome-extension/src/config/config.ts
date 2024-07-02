@@ -6,7 +6,7 @@ import { getDatabase } from 'firebase/database';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyAwxgE8l6N78tcCKV7RqCK8eWE86BGrL30",
-  authDomain: "imageca-5c31b.firebaseapp.com",
+  authDomain: "extension://pkaoachhkbohdjckmnjodnokepdeigmk/",
   projectId: "imageca-5c31b",
   storageBucket: "imageca-5c31b.appspot.com",
   messagingSenderId: "59672534366",
