@@ -1,11 +1,2 @@
 __pycache__
-
-# Image data
-*.HEIC
-*.heic 
-*.PNG
-*.png 
-*.JPG
-*.jpg 
-*.JPEG 
-*.jpeg 
+data

@@ -1,13 +1,11 @@
 from PIL import Image
 import pillow_heif
-import imagehash
 
 
-def extract_metadata(filename):        
+def extract_metadata(filepath):        
     
     pillow_heif.register_heif_opener() 
     metadata = {}
-    filepath = filename                             # change this if change file location
 
     with Image.open(filepath) as img:
         metadata = img.info                         # Extract basic metadata
