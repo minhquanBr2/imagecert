@@ -1,0 +1,136 @@
+* {
+  box-sizing: border-box;
+  /* font-size: 1rem; */
+}
+
+* a {
+  text-decoration: none;
+  color: #151515;
+}
+.pinterest {
+  z-index: 30;
+  position: fixed;
+  height: 8%;
+  top: 0;
+  width: 80vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1%;
+  padding: 0.938rem;
+  /* background: white; */
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  padding-left: 5%;
+  width: 15%;
+  height: 5vh;
+}
+.left .logo {
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+}
+.left .logo:hover {
+  background-color: #e5e5e5;
+}
+.left .logo i {
+  color: #e60022;
+  font-size: 24px;
+}
+
+@media (max-width: 1024px) {
+  .pinterest {
+    width: 100%;
+    justify-content: space-evenly;
+  }
+  .avatar .img {
+    display: none;
+  }
+  .right {
+    align-items: end;
+  }
+  .right .items-down {
+    display: none;
+  }
+  .left {
+    padding-left: 0%;
+  }
+}
+.avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.avatar .img {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.avatar .img img {
+  position: absolute;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+.search {
+  width: 80%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 3rem;
+  border-radius: 25px;
+  overflow: hidden;
+  background: #e3e3e3;
+}
+.search:hover {
+  background: #c9c9c9;
+}
+.search i {
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #767676;
+}
+.search input {
+  width: 100%;
+  border: none;
+  background: none;
+  outline: none;
+  padding-right: 1rem;
+}
+.search input::placeholder {
+  color: #767676;
+  font-size: 1rem;
+}
+.right {
+  width: 20%;
+  display: flex;
+  align-items: center;
+}
+.items {
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.items:hover {
+  background: #e5e5e5;
+}
+.items i {
+  font-size: 1rem;
+  color: #767676;
+}
