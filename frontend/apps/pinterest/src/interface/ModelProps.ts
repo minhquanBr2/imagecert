@@ -1,0 +1,3 @@
+interface ModalProps {
+  refreshPins: () => void;
+}

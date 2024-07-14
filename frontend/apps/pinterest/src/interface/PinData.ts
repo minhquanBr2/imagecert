@@ -6,4 +6,5 @@ export interface PinData {
   destination: string;
   pin_size: string;
   tags: string[];
+  img_url: string;
 }

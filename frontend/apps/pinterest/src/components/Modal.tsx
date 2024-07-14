@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
-
-
-import { savePinBackend } from '../firebase_setup/DatabaseOperations.ts';
+import React, { useEffect, useState } from 'react';
+import TagsCreator from './TagsCreator'; // Adjust the import according to your file structure
+import LoadingIcon from './LoadingIcon'; // Adjust the import according to your file structure
+import { savePinBackend } from '../firebase_setup/DatabaseOperations';
+import { PinData } from '../interface/PinData';
+import { checkSize } from '../utils/checkSize';
 import '../styles/modal_styles.css';
-import TagsCreator from './TagsCreator.tsx';
-import LoadingIcon from './LoadingIcon.tsx';
 
 let img_file : File;
+
 
 function uploadImage(event: React.ChangeEvent<HTMLInputElement>, pinDetails: any, setPinDetails: React.Dispatch<React.SetStateAction<any>>, setShowLabel: React.Dispatch<React.SetStateAction<boolean>>, setShowModalPin: React.Dispatch<React.SetStateAction<boolean>>) {
   if (event.target.files && event.target.files[0]) {
@@ -26,20 +27,9 @@ function uploadImage(event: React.ChangeEvent<HTMLInputElement>, pinDetails: any
   }
 }
 
-function checkSize(event: React.SyntheticEvent) {
-  const image = event.target as HTMLImageElement;
-  image.classList.add('pin_max_width');
-  if (!image.parentElement) return;
-  if (image.getBoundingClientRect().width < image.parentElement.getBoundingClientRect().width || image.getBoundingClientRect().height < image.parentElement.getBoundingClientRect().height) {
-    image.classList.remove('pin_max_width');
-    image.classList.add('pin_max_height');
-  }
-  image.style.opacity = '1';
-}
-
-async function savePin(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, e: React.MouseEvent<HTMLDivElement>, pinDetails: any, refreshPins: () => void) {
+async function savePin(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, e: React.MouseEvent<HTMLDivElement>, pinDetails: PinData, refreshPins: () => void) {
   setIsLoading(true);
-  const users_data = {
+  const pin_metadata = {
     ...pinDetails,
     author: 'Patryk',
     board: 'default',
@@ -49,13 +39,17 @@ async function savePin(setIsLoading: React.Dispatch<React.SetStateAction<boolean
     pin_size: (document.querySelector('#pin_size') as HTMLSelectElement).value,
   };
 
-  await savePinBackend(e, users_data, img_file);
+  console.log(pin_metadata);
+
+  //TODO: add save image to BackEnd endpoints
+  // await savePinBackend(e, pin_metadata, img_file);
 
   refreshPins();
   setIsLoading(false);
 }
 
-function Modal(props : any){
+
+const Modal: React.FC<ModalProps> = (props) => {
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     if (window.onscrollend !== undefined) {
@@ -65,16 +59,8 @@ function Modal(props : any){
       document.body.style.overflow = 'unset';
     };
   }, []);
-  const [pinDetails, setPinDetails] = useState<{
-    author: string;
-    board: string;
-    title: string;
-    destination: string;
-    description: string;
-    img_url: string;
-    pin_size: string;
-    tags: string[];
-  }>({
+
+  const [pinDetails, setPinDetails] = useState<PinData>({
     author: '',
     board: '',
     title: '',
@@ -88,14 +74,15 @@ function Modal(props : any){
   const [showModalPin, setShowModalPin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [tags, setTags] = useState<string[]>(['Default', 'Pin']);
-  const addTag = (event: any) => {
-    if (event.target.value !== '') {
-      setTags([...tags, event.target.value]);
+
+  const addTag = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.currentTarget.value !== '') {
+      setTags([...tags, event.currentTarget.value]);
       setPinDetails({
         ...pinDetails,
-        tags: tags,
+        tags: [...tags, event.currentTarget.value],
       });
-      event.target.value = '';
+      event.currentTarget.value = '';
     }
   };
 
@@ -119,7 +106,13 @@ function Modal(props : any){
                   <div>Recommendation: Use high-quality .jpg less than 20MB</div>
                 </div>
               </div>
-              <input onChange={(event) => uploadImage(event, pinDetails, setPinDetails, setShowLabel, setShowModalPin)} type='file' name='upload_img' id='upload_img' value='' />
+              <input
+                onChange={(event) => uploadImage(event, pinDetails, setPinDetails, setShowLabel, setShowModalPin)}
+                type='file'
+                name='upload_img'
+                id='upload_img'
+                value=''
+              />
             </label>
             <div className='modals_pin' style={{ display: showModalPin ? 'block' : 'none' }}>
               <div className='pin_image'>
@@ -127,10 +120,9 @@ function Modal(props : any){
               </div>
             </div>
           </div>
-
-          <div className='section3'>
+          {/* <div className='section3'>
             <div className='save_from_site'>Save from site</div>
-          </div>
+          </div> */}
         </div>
         <div className='side' id='right_side'>
           <div className='section1'>
@@ -140,7 +132,10 @@ function Modal(props : any){
                 <option value='medium'>Medium</option>
                 <option value='large'>Large</option>
               </select>
-              <div onClick={(e) => savePin(setIsLoading, e, pinDetails, props.refreshPins)} className='save_pin'>
+              <div
+                onClick={(e) => savePin(setIsLoading, e, pinDetails, props.refreshPins)}
+                className='save_pin'
+              >
                 Save
               </div>
             </div>
@@ -149,7 +144,13 @@ function Modal(props : any){
             <input placeholder='Add your title' type='text' className='new_pin_input' id='pin_title' />
             <input placeholder='Describe what the Pin is about' type='text' className='new_pin_input' id='pin_description' />
             <input placeholder='Add a destination link' type='text' className='new_pin_input' id='pin_destination' />
-            <input placeholder='Add tags by clicking Enter' type='text' className='new_pin_input' id='pin_tags' onKeyUp={(event) => (event.key === 'Enter' ? addTag(event) : null)} />
+            <input
+              placeholder='Add tags by clicking Enter'
+              type='text'
+              className='new_pin_input'
+              id='pin_tags'
+              onKeyUp={(event) => (event.key === 'Enter' ? addTag(event) : null)}
+            />
           </div>
           <div className='section3' id='tags_container'>
             <TagsCreator tags={tags} setTags={setTags} editable={true} />
@@ -157,23 +158,8 @@ function Modal(props : any){
         </div>
       </div>
       {isLoading ? <LoadingIcon /> : null}
-      {/* <ReactJoyride
-        continuous
-        scrollToFirstStep
-        disableScrolling={true}
-        showProgress
-        showSkipButton
-        steps={ModalSteps as any}
-        styles={{
-          options: {
-            primaryColor: '#ff0400',
-            textColor: '#004a14',
-            zIndex: 1000,
-          },
-        }}
-      /> */}
     </div>
   );
-}
+};
 
 export default Modal;
