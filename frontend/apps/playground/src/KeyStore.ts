@@ -1,3 +1,40 @@
+// async function generateAndExportKeyPair(): Promise<{ publicKeyFile: Blob, privateKeyFile: Blob }> {
+//     const keyPair = await window.crypto.subtle.generateKey(
+//         {
+//             name: "RSASSA-PKCS1-v1_5",
+//             modulusLength: 2048,
+//             publicExponent: new Uint8Array([1, 0, 1]),
+//             hash: "SHA-256"
+//         },
+//         true,
+//         ["sign", "verify"]
+//     );
+
+//     const publicKey = await window.crypto.subtle.exportKey("spki", keyPair.publicKey);
+//     const privateKey = await window.crypto.subtle.exportKey("pkcs8", keyPair.privateKey);
+
+//     const publicKeyFile = new Blob([publicKey], { type: "application/x-pem-file" });
+//     const privateKeyFile = new Blob([privateKey], { type: "application/x-pem-file" });
+
+//     return { publicKeyFile, privateKeyFile };
+// }
+
+
+// async function importPrivateKey(privateKeyFile: Blob): Promise<CryptoKey> {
+//     const privateKeyArrayBuffer = await privateKeyFile.arrayBuffer();
+//     const privateKey = await window.crypto.subtle.importKey(
+//         "pkcs8",
+//         privateKeyArrayBuffer,
+//         {
+//             name: "RSASSA-PKCS1-v1_5",
+//             hash: "SHA-256"
+//         },
+//         true,
+//         ["sign"]
+//     );
+//     return privateKey;
+// }
+
 
 
 
@@ -38,34 +75,30 @@ class KeyStore {
         });
     }
 
-    saveKey(publicKey: CryptoKey, privateKey: CryptoKey | null, name: string): Promise<any> {
+
+    savePrivateKey(privateKey: CryptoKey, name: string): Promise<any> {
         return new Promise((fulfill, reject) => {
             if (!this.db) {
                 return reject(new Error("KeyStore is not open."));
             }
 
-            window.crypto.subtle.exportKey('spki', publicKey)
-                .then((spki) => {
-                    const savedObject = {
-                        publicKey: publicKey,
-                        privateKey: privateKey,
-                        name: name,
-                        spki: spki
-                    };
+            const savedObject = {
+                privateKey: privateKey,
+                name: name
+            };
 
-                    const transaction = this.db!.transaction([this.objectStoreName], "readwrite");
-                    transaction.onerror = (evt: any) => reject(evt.error);
-                    transaction.onabort = (evt: any) => reject(evt.error);
-                    transaction.oncomplete = () => fulfill(savedObject);
+            const transaction = this.db!.transaction([this.objectStoreName], "readwrite");
+            transaction.onerror = (evt: any) => reject(evt.error);
+            transaction.onabort = (evt: any) => reject(evt.error);
+            transaction.oncomplete = () => fulfill(savedObject);
 
-                    const objectStore = transaction.objectStore(this.objectStoreName);
-                    objectStore.add(savedObject);
-                })
-                .catch((err) => reject(err));
+            const objectStore = transaction.objectStore(this.objectStoreName);
+            objectStore.add(savedObject);
         });
     }
 
-    getKey(propertyName: "id" | "name" | "spki", propertyValue: any): Promise<any> {
+
+    getPrivateKeyByName(name: string): Promise<any> {
         return new Promise((fulfill, reject) => {
             if (!this.db) {
                 return reject(new Error("KeyStore is not open."));
@@ -73,22 +106,13 @@ class KeyStore {
 
             const transaction = this.db.transaction([this.objectStoreName], "readonly");
             const objectStore = transaction.objectStore(this.objectStoreName);
-
-            let request: IDBRequest;
-            if (propertyName === "id") {
-                request = objectStore.get(propertyValue);
-            } else if (propertyName === "name") {
-                request = objectStore.index("name").get(propertyValue);
-            } else if (propertyName === "spki") {
-                request = objectStore.index("spki").get(propertyValue);
-            } else {
-                return reject(new Error("No such property: " + propertyName));
-            }
+            const request = objectStore.index("name").get(name);
 
             request.onsuccess = (evt: any) => fulfill(evt.target.result);
             request.onerror = (evt: any) => reject(evt.target.error);
         });
     }
+
 
     listKeys(): Promise<any[]> {
         return new Promise((fulfill, reject) => {

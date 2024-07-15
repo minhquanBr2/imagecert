@@ -1,13 +1,14 @@
 import os
 
 SRC_DIR = "/home/pc/imagecert/backend/src"                                      
-IMAGE_DIR = "/home/pc/imagecert/backend/data/images"                                    
+TEMP_IMAGE_DIR = "/home/pc/imagecert/backend/data/images/temp"    
+PERM_IMAGE_DIR = "/home/pc/imagecert/backend/data/images/perm"                          
 DATABASE_DIR = "/home/pc/imagecert/backend/data/database"                       
 IMAGEDB_PATH = "/home/pc/imagecert/backend/data/database/imagedb.db"  
 
 # Verification status
 VERIFICATION_STATUS = {
-    "ACCEPT": 0,
-    "CONSIDER": 1,
-    "REJECT": 2
+    "ACCEPTED": 0,
+    "PENDING": 1,
+    "REJECTED": 2
 }

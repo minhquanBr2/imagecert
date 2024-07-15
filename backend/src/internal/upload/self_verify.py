@@ -20,7 +20,7 @@ def self_verify_image(filepath: str):
         similarity = get_hash_similarity(hash_value, hash)
         if similarity >= HIGH_THRESHOLD:
             ref_filepath = "dummy.jpg"
-            return config.VERIFICATION_STATUS["REJECT"], hash_object, ref_filepath
+            return config.VERIFICATION_STATUS["REJECTED"], hash_object, ref_filepath
         elif similarity >=LOW_THRESHOLD:
-            return config.VERIFICATION_STATUS["CONSIDER"], hash_object, ""
-    return config.VERIFICATION_STATUS["ACCEPT"], hash_object, ""
+            return config.VERIFICATION_STATUS["PENDING"], hash_object, ""
+    return config.VERIFICATION_STATUS["ACCEPTED"], hash_object, ""
