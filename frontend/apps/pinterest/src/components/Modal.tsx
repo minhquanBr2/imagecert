@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import TagsCreator from './TagsCreator'; // Adjust the import according to your file structure
 import LoadingIcon from './LoadingIcon'; // Adjust the import according to your file structure
 import { savePinBackend } from '../firebase_setup/DatabaseOperations';
-import { PinData } from '../interface/PinData';
+import { PinData, PinDetails } from '../interface/PinData';
 import { checkSize } from '../utils/checkSize';
 import '../styles/modal_styles.css';
+import { toast } from 'react-toastify';
 
 let img_file : File;
 
@@ -29,20 +30,28 @@ function uploadImage(event: React.ChangeEvent<HTMLInputElement>, pinDetails: any
 
 async function savePin(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, e: React.MouseEvent<HTMLDivElement>, pinDetails: PinData, refreshPins: () => void) {
   setIsLoading(true);
-  const pin_metadata = {
+  console.log('pinDetails', pinDetails);
+  const pin_metadata : PinDetails = {
     ...pinDetails,
     author: 'Patryk',
     board: 'default',
     title: (document.querySelector('#pin_title') as HTMLInputElement).value,
     description: (document.querySelector('#pin_description') as HTMLInputElement).value,
-    destination: (document.querySelector('#pin_destination') as HTMLInputElement).value,
     pin_size: (document.querySelector('#pin_size') as HTMLSelectElement).value,
+    imageId: new Date().toISOString().replace(/[^0-9-]/g, ''),
+    tags: pinDetails.tags,
   };
 
-  console.log(pin_metadata);
+  console.log('pin_metadata', pin_metadata);
 
   //TODO: add save image to BackEnd endpoints
-  // await savePinBackend(e, pin_metadata, img_file);
+  const doc_snap = await savePinBackend(e, pin_metadata, img_file);
+  if (!doc_snap){
+    toast.error('Error saving pin');
+    return;
+  }
+  console.log(doc_snap);
+
 
   refreshPins();
   setIsLoading(false);
@@ -60,20 +69,19 @@ const Modal: React.FC<ModalProps> = (props) => {
     };
   }, []);
 
-  const [pinDetails, setPinDetails] = useState<PinData>({
+  const [pinDetails, setPinDetails] = useState<PinDetails>({
     author: '',
     board: '',
-    title: '',
-    destination: '',
     description: '',
     img_url: '',
     pin_size: '',
-    tags: [],
+    tags: ['Default', 'Pin'],
+    title: '',
   });
   const [showLabel, setShowLabel] = useState(true);
   const [showModalPin, setShowModalPin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [tags, setTags] = useState<string[]>(['Default', 'Pin']);
+  const [tags, setTags] = useState<string[]>(pinDetails.tags);
 
   const addTag = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.currentTarget.value !== '') {
@@ -86,9 +94,24 @@ const Modal: React.FC<ModalProps> = (props) => {
     }
   };
 
+  const modalRef = React.useRef<HTMLDivElement>(null);
+
+  const handleClickOutside = (event: any) => {
+    if (modalRef.current && !modalRef.current.contains(event.target)) {
+      props.setShowModal(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className='add_pin_modal'>
-      <div className='add_pin_container'>
+      <div className='add_pin_container' ref={modalRef}>
         <div className='side' id='left_side'>
           <div className='section1'>
             <div className='pint_mock_icon_container'>
@@ -143,7 +166,7 @@ const Modal: React.FC<ModalProps> = (props) => {
           <div className='section2' id='pin_details'>
             <input placeholder='Add your title' type='text' className='new_pin_input' id='pin_title' />
             <input placeholder='Describe what the Pin is about' type='text' className='new_pin_input' id='pin_description' />
-            <input placeholder='Add a destination link' type='text' className='new_pin_input' id='pin_destination' />
+            {/* <input placeholder='Add a location link' type='text' className='new_pin_input' id='pin_location' /> */}
             <input
               placeholder='Add tags by clicking Enter'
               type='text'

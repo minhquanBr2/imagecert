@@ -6,36 +6,39 @@ import '../styles/final_board_styles.css';
 import autoAnimate from '@formkit/auto-animate';
 import { Header, LoadingIcon, Modal, OpenPin, Pin } from './index.ts';
 import RandomPin from './RandomPin.tsx';
-
+import { PinDetails } from '../interface/PinData.ts';
 
 const FinalBoard: React.FC = () => {
   const animateRef = useRef(null);
-
   const [pinsFromDb, setPinsFromDb] = useState<any[]>([]);
   const [pinsToShow, setPinsToShow] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [showOpenPin, setShowOpenPin] = useState(false);
   const [showGuidelines, setShowGuidelines] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
-  const [pinDetails, setPinDetails] = useState(null);
-
-  useEffect(() => {
-    fetchPins();
-    if (animateRef.current) {
-      autoAnimate(animateRef.current);
-    }
-  }, []);
+  const [pinDetails, setPinDetails] = useState<PinDetails | null>(null);
 
   const fetchPins = async () => {
     let pinsArray: any[] = [];
-    // let fetchedPins: any[] = await fetchPinsBackend().catch((error) => console.error(error));
-    let fetchedPins: any[] = [];
-    fetchedPins.forEach((p) => {
-      pinsArray.push(<Pin pinDetails={p} key={p.id} openPin={openPin} deletePin={deletePin} />);
+    const firebaseData = await fetchPinsBackend();
+    console.log('Firebase data: ', firebaseData);
+    firebaseData.map((pin: any) => {
+      pinsArray.push(
+        <Pin
+          key={pin.imageId}
+          pinDetails={pin}
+          openPin={openPin}
+        />
+      );
     });
+    console.log("Pins array: ", pinsArray);
     setPinsFromDb(pinsArray);
     setPinsToShow(pinsArray);
   };
+
+  useEffect(() => {
+    fetchPins();
+  }, []);
 
   const refreshPins = async () => {
     setShowModal(false);
@@ -48,7 +51,6 @@ const FinalBoard: React.FC = () => {
   };
 
   const deletePin = async (pinDetails: any) => {
-    // todo: add loading mode and/or transition state (blur the pin, fade it out etc)
     await deletePinBackend(pinDetails);
     await fetchPins();
     setShowOpenPin(false);
@@ -76,21 +78,6 @@ const FinalBoard: React.FC = () => {
             <img src='./images/add.png' alt='add_pin' className='pint_mock_icon' />
           </div>
         </Tooltip>
-        {/* <Tooltip title='Generate random Pin'>
-          <div onClick={(event) => generateRandomPin(event)} className='pint_mock_icon_container add_pin'>
-            <img src='./images/shuffle.png' alt='random' className='pint_mock_icon' />
-          </div>
-        </Tooltip> */}
-        {/* <Tooltip title='Refresh Pins'>
-          <div onClick={() => refreshPins()} className='pint_mock_icon_container add_pin'>
-            <img src='./images/refresh.png' alt='refresh' className='pint_mock_icon' />
-          </div>
-        </Tooltip>
-        <Tooltip title='Show guidelines'>
-          <div onClick={() => setShowGuidelines(true)} className='pint_mock_icon_container add_pin'>
-            <img src='./images/help.png' alt='help' className='pint_mock_icon' />
-          </div>
-        </Tooltip> */}
       </div>
       <div className='pin_container' ref={animateRef} id='pin_container'>
         {pinsToShow}
@@ -104,22 +91,20 @@ const FinalBoard: React.FC = () => {
         }}
         className='add_pin_modal_container'
       >
-        {showModal ? <Modal refreshPins={refreshPins} /> : null}
+        {showModal ? <Modal setShowModal={setShowModal} refreshPins={refreshPins} /> : null}
       </div>
       <div 
        onClick={(event) => {
         const target = event.target as HTMLElement;
+        console.log('target: ', target);
         if (target.className === 'open_pin_modal_container') {
           setShowOpenPin(false);
         }
       }}
         className='open_pin_modal_container'
         >
-        {showOpenPin ? <OpenPin pinDetails={pinDetails} deletePin={deletePin} /> : null}
+        {showOpenPin ? <OpenPin setShowOpenPin={setShowOpenPin} pinDetails={pinDetails} deletePin={deletePin} /> : null}
       </div>
-      {/* <div onClick={(event) => (event.target.className === 'guidelines_modal' ? setShowGuidelines(false) : null)} className='guidelines_modal_container'>
-        {showGuidelines ? <Guidelines /> : null}
-      </div> */}
       {showLoading ? <LoadingIcon /> : null}
     </div>
   );

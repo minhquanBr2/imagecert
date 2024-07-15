@@ -4,7 +4,7 @@ const TagsCreator = (props: any) => {
   const removeTags = (indexToRemove: number) => {
     props.setTags([...props.tags.filter((_ : any, index : number) => index !== indexToRemove)]);
   };
-
+  console.log('tags: ', props);
   return (
     <div className='tags-container'>
       <div className='tags-input'>

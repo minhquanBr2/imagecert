@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import EnlargeImg from './EnlargeImg';
 import '../styles/open_pin_styles.css';
 import Swal from 'sweetalert2';
@@ -36,15 +36,26 @@ const deletePin = (pinDetails: any, deletePin: any) => {
 };
 
 const OpenPin: React.FC<any> = (props) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     document.body.style.overflow = 'hidden';
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.body.style.overflow = 'unset';
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-  
+
+  const handleClickOutside = (event: any) => {
+    if ((modalRef.current) && !(modalRef.current as HTMLElement).contains(event.target)) {
+      props.setShowOpenPin(false);
+      console.log('clicked outside');
+    }
+  };
+
   window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-  
+
   const [showLargeImg, setShowLargeImg] = useState(false);
   const [isEditable, setIsEditable] = useState(false);
 
@@ -65,11 +76,12 @@ const OpenPin: React.FC<any> = (props) => {
       key: '3',
     },
   ];
+  console.log('props Pin details: ', props);
 
   return (
     <div className='open_pin_modal'>
       {showLargeImg ? <EnlargeImg src={props.pinDetails.img_url} showLargeImg={showLargeImg} setShowLargeImg={setShowLargeImg} /> : null}
-      <div className='open_pin_container'>
+      <div className='open_pin_container' ref={modalRef}>
         <div className='side' id='left_side_open'>
           <div className='open_section'>
             <div className='open_modals_pin'>
