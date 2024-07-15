@@ -23,6 +23,8 @@ const LoginScreen: React.FC = () => {
           email: user?.email || '',
           photoURL: user?.photoURL || '',
           uid: user?.uid || '',
+          accessToken: token || '',
+          // refreshToken: '',
         };
 
         try {

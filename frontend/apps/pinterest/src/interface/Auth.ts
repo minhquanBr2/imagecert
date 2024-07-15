@@ -2,7 +2,7 @@
 export interface AuthT {
 	email: string
 	displayName: string
-	uid?: string
+	uid: string
 	photoURL: string
 }
 

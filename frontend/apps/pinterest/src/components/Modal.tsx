@@ -6,6 +6,7 @@ import { PinData, PinDetails } from '../interface/PinData';
 import { checkSize } from '../utils/checkSize';
 import '../styles/modal_styles.css';
 import { toast } from 'react-toastify';
+import { ImageServices } from '../service/image';
 
 let img_file : File;
 
@@ -31,9 +32,10 @@ function uploadImage(event: React.ChangeEvent<HTMLInputElement>, pinDetails: any
 async function savePin(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, e: React.MouseEvent<HTMLDivElement>, pinDetails: PinData, refreshPins: () => void) {
   setIsLoading(true);
   console.log('pinDetails', pinDetails);
+  const user = JSON.parse(localStorage.getItem('user') as string);
   const pin_metadata : PinDetails = {
     ...pinDetails,
-    author: 'Patryk',
+    author: user.uid,
     board: 'default',
     title: (document.querySelector('#pin_title') as HTMLInputElement).value,
     description: (document.querySelector('#pin_description') as HTMLInputElement).value,
@@ -44,17 +46,26 @@ async function savePin(setIsLoading: React.Dispatch<React.SetStateAction<boolean
 
   console.log('pin_metadata', pin_metadata);
 
-  //TODO: add save image to BackEnd endpoints
-  const doc_snap = await savePinBackend(e, pin_metadata, img_file);
-  if (!doc_snap){
-    toast.error('Error saving pin');
+  ImageServices.uploadImage(img_file).then((response) => {
+    console.log(response);
+    if (response.status === 200) {
+      //TODO: add save image to BackEnd endpoints
+      // const doc_snap = await savePinBackend(e, pin_metadata, img_file);
+      // if (!doc_snap){
+      //   toast.error('Error saving pin');
+      //   return;
+      // }
+      // console.log(doc_snap);
+      toast.success('Image uploaded successfully');
+      refreshPins();
+      setIsLoading(false);
+    }
+  }).catch((error) => {
+    console.error('Error uploading image', error);
+    toast.error('Error uploading image');
+    setIsLoading(false);
     return;
-  }
-  console.log(doc_snap);
-
-
-  refreshPins();
-  setIsLoading(false);
+  });
 }
 
 
