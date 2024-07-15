@@ -48,9 +48,9 @@ const OpenPin: React.FC<any> = (props) => {
   }, []);
 
   const handleClickOutside = (event: any) => {
-    if ((modalRef.current) && !(modalRef.current as HTMLElement).contains(event.target)) {
+    if ((modalRef.current) && (!(modalRef.current as HTMLElement).contains(event.target))) {
       props.setShowOpenPin(false);
-      console.log('clicked outside');
+      console.log('clicked outside', event.target);
     }
   };
 
@@ -80,8 +80,8 @@ const OpenPin: React.FC<any> = (props) => {
 
   return (
     <div className='open_pin_modal'>
-      {showLargeImg ? <EnlargeImg src={props.pinDetails.img_url} showLargeImg={showLargeImg} setShowLargeImg={setShowLargeImg} /> : null}
       <div className='open_pin_container' ref={modalRef}>
+        {showLargeImg ? <EnlargeImg src={props.pinDetails.img_url} showLargeImg={showLargeImg} setShowLargeImg={setShowLargeImg} /> : null}
         <div className='side' id='left_side_open'>
           <div className='open_section'>
             <div className='open_modals_pin'>

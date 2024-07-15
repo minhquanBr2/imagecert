@@ -1,16 +1,24 @@
 import './styles/normalize.css';
 
 import FinalBoard from './components/FinalBoard';
-import React from 'react';
+import React, { useContext } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { firestore } from './firebase_setup/firebase';
+import AuthContext from './context/AuthContext';
+import LoginScreen from './pages/Login';
 firestore
-function App() {
+
+
+
+const  App = () =>  {
+
+  const { user } = useContext(AuthContext);
+
   return (
     <React.Fragment>
       <ToastContainer/>
-      <FinalBoard />
+      {user ? <FinalBoard /> : <LoginScreen/>}
     </React.Fragment>
   );
 }
