@@ -1,5 +1,6 @@
 from db.db_insert import insert_image, insert_hash, insert_verification_status
 from internal.upload.extract_metadata import extract_metadata
+from internal.upload.preprocess import generate_image_name
 import time
 import cv2
 import os
@@ -41,5 +42,14 @@ def save_webp_image(filepath):
     return webp_filepath
 
 
-def save_temp_image(filepath):
-    pass
+def save_temp_image(file):
+    original_filename = file.filename
+    extension = original_filename.split(".")[-1]
+    filename = generate_image_name()
+    temp_filepath = os.path.join(config.TEMP_IMAGE_DIR, f"{filename}.{extension}")
+
+    with open(temp_filepath, "wb") as buffer:
+        buffer.write(file.file.read())
+    file.file.close()
+    
+    return original_filename, filename, temp_filepath

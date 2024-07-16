@@ -5,7 +5,6 @@ sys.path.append('..')
 from internal.upload.save import save_uploaded_data_to_db, save_webp_image, save_temp_image
 from internal.upload.self_verify import self_verify_image
 from internal.upload.extract_metadata import extract_metadata
-from internal.upload.preprocess import generate_image_name
 import os
 import config
 import base64
@@ -25,14 +24,7 @@ async def upload_image(request: Request, file: UploadFile = File(...)):
     print(f"File {file.filename} received from user {user_uid}.")
     
     try: 
-        original_filename = file.filename
-        extension = original_filename.split(".")[-1]
-        filename = generate_image_name()
-        temp_filepath = os.path.join(config.TEMP_IMAGE_DIR, f"{filename}.{extension}")
-        with open(temp_filepath, "wb") as buffer:
-            buffer.write(file.file.read())
-        file.file.close()
-
+        original_filename, filename, temp_filepath = save_temp_image(file)
         verification_status, hash_object, ref_filepath = self_verify_image(temp_filepath)
         print(f"Verification status: {verification_status}.")
 

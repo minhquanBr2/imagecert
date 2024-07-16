@@ -32,7 +32,7 @@ class FirebaseAuthMiddleware(BaseHTTPMiddleware):
             decoded_token = auth.verify_id_token(token)
             request.state.user = decoded_token
         except Exception as e:
-            raise HTTPException(status_code=401, detail=f"Invalid or expired token due to {str(e)}")
+            raise HTTPException(status_code=401, detail=f"Invalid or expired token: {str(e)}")
 
         response = await call_next(request)
         return response
