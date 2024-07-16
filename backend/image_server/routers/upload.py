@@ -2,9 +2,10 @@ from fastapi import APIRouter, Request, Form, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 import sys 
 sys.path.append('..')
-from internal.upload.save import save_uploaded_data_to_db, save_webp_image
+from internal.upload.save import save_uploaded_data_to_db, save_webp_image, save_temp_image
 from internal.upload.self_verify import self_verify_image
 from internal.upload.extract_metadata import extract_metadata
+from internal.upload.preprocess import generate_image_name
 import os
 import config
 import base64
@@ -19,25 +20,30 @@ router = APIRouter(
 @router.post("/image")
 async def upload_image(request: Request, file: UploadFile = File(...)):
 
-    userUID = request.state.user['uid']  # Access the user UID from Firebase token
-    print(f"File {file.filename} received from user {userUID}.")
+    # user_uid = request.state.user['uid']                                    # Access the user UID from Firebase token
+    user_uid = "abc"
+    print(f"File {file.filename} received from user {user_uid}.")
     
     try: 
-        filepath = os.path.join(config.TEMP_IMAGE_DIR, file.filename)
-        with open(filepath, "wb") as buffer:
+        original_filename = file.filename
+        extension = original_filename.split(".")[-1]
+        filename = generate_image_name()
+        temp_filepath = os.path.join(config.TEMP_IMAGE_DIR, f"{filename}.{extension}")
+        with open(temp_filepath, "wb") as buffer:
             buffer.write(file.file.read())
         file.file.close()
-        verification_status, hash_object, ref_filepath = self_verify_image(filepath)
+
+        verification_status, hash_object, ref_filepath = self_verify_image(temp_filepath)
         print(f"Verification status: {verification_status}.")
 
         if verification_status == config.VERIFICATION_STATUS["ACCEPTED"]:
-            webp_filepath = save_webp_image(filepath)
-            save_uploaded_data_to_db(userUID, webp_filepath, verification_status, hash_object)
+            perm_filepath = save_webp_image(temp_filepath)
+            save_uploaded_data_to_db(user_uid, original_filename, filename, temp_filepath, verification_status, hash_object)
             # TODO: prompt user to select private key file, next request only need to send the signature
             return {"message": "Image registered successfully. Please sign the image."}
         elif verification_status == config.VERIFICATION_STATUS["PENDING"]:
-            webp_filepath = save_webp_image(filepath)
-            save_uploaded_data_to_db(userUID, webp_filepath, verification_status, hash_object)
+            perm_filepath = save_webp_image(temp_filepath)
+            save_uploaded_data_to_db(user_uid, original_filename, filename, perm_filepath, verification_status, hash_object)
             return {"message": "Image is under consideration."}
         else:
             return {"message": f"Image is rejected. A reference image can be found at {ref_filepath}."}

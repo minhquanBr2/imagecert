@@ -5,8 +5,8 @@ import cv2
 import os
 import config
 
-def save_image(userUID, filepath):
-    metadata = extract_metadata(filepath)
+def save_image(userUID, originalFilename, filename, temp_filepath):
+    metadata = extract_metadata(temp_filepath)
     # try if timestamp exists, else assign ""
     # TODO: mapping metadata to db schema
     timestamp = metadata.get("DateTime", "")
@@ -14,7 +14,7 @@ def save_image(userUID, filepath):
     location = metadata.get("GPSInfo", "")
     deviceName = metadata.get("Model", "")
     signature = ""
-    imageID = insert_image(userUID, filepath, timestamp, caption, location, deviceName, signature)
+    imageID = insert_image(userUID, originalFilename, filename, timestamp, caption, location, deviceName, signature)
     return imageID
 
 
@@ -26,10 +26,10 @@ def save_verification_status(imageID, result, verificationTimestamp):
     insert_verification_status(imageID, 0, result, verificationTimestamp)
 
 
-def save_uploaded_data_to_db(userUID, filepath, verification_status, hash):
-    imageID = save_image(userUID, filepath)
+def save_uploaded_data_to_db(userUID, originalFilename, filename, temp_filepath, verificationStatus, hash):
+    imageID = save_image(userUID, originalFilename, filename, temp_filepath)
     save_hash(imageID, hash)
-    save_verification_status(imageID, verification_status, time.time())
+    save_verification_status(imageID, verificationStatus, time.time())
 
 
 def save_webp_image(filepath):
@@ -39,3 +39,7 @@ def save_webp_image(filepath):
     img = cv2.imread(filepath)
     cv2.imwrite(webp_filepath, img, [int(cv2.IMWRITE_WEBP_QUALITY), 80])
     return webp_filepath
+
+
+def save_temp_image(filepath):
+    pass

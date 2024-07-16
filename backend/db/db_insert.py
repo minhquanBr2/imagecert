@@ -1,13 +1,13 @@
 import sqlite3
 import config
 
-def insert_image(userUID, url, timestamp, caption, location, deviceName, signature):
+def insert_image(userUID, originalFilename, filename, timestamp, caption, location, deviceName, signature):
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO image (userUID, url, timestamp, caption, location, deviceName, signature)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''', (userUID, url, timestamp, caption, location, deviceName, signature))
+        INSERT INTO image (userUID, originalFilename, filename, timestamp, caption, location, deviceName, signature)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (userUID, originalFilename, filename, timestamp, caption, location, deviceName, signature))
     conn.commit()
     conn.close()
     return cursor.lastrowid

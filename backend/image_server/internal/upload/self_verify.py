@@ -23,4 +23,4 @@ def self_verify_image(filepath: str):
             return config.VERIFICATION_STATUS["REJECTED"], hash_object, ref_filepath
         elif similarity >=LOW_THRESHOLD:
             return config.VERIFICATION_STATUS["PENDING"], hash_object, ""
-    return config.VERIFICATION_STATUS["ACCEPTED"], hash_object, ""
+    return config.VERIFICATION_STATUS["PENDING"], hash_object, ""
