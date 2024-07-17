@@ -1,67 +1,43 @@
-import { collection, doc, addDoc, getDoc, updateDoc, getDocs, deleteDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { firestore } from './firebase.ts';
 import imageCompression from 'browser-image-compression';
-import { PinData } from '../interface/PinData.ts';
-
-interface PinDetails {
-  id: string;
-  // Add other fields as required
-}
+import { PinData, PinDetails } from '../interface/PinData.ts';
+import { toast } from 'react-toastify';
+import { getDatabase, set, ref, get, child } from 'firebase/database';
 
 export async function fetchPinsBackend(): Promise<any[]> {
   let fetchedPins: any[] = [];
-  try {
-    await getDocs(collection(firestore, 'pins')).then((querySnapshot) => {
-      const newData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-      newData.forEach((p) => {
-        fetchedPins.push(p);
-      });
+  const db = getDatabase();
+  const dbRef = ref(db, 'pins/');
+  const snapshot  = await get(dbRef);
+  if (snapshot.exists()) {
+    snapshot.forEach((childSnapshot) => {
+      fetchedPins.push(childSnapshot.val());
     });
-  } catch (error) {
-    console.log(error);
+    //Sort fetch pin inverse order
+    fetchedPins.sort((a, b) => (a.imageId > b.imageId) ? -1 : 1);
+  } else {
+    console.log('No data available');
   }
+  
   return fetchedPins;
 }
 
-export async function savePinBackend(e: React.FormEvent, users_data: PinData, imageFile: File): Promise<any> {
-  let doc_snap;
-  e.preventDefault();
+export async function savePinBackend(e: React.FormEvent, pins_metadata: PinDetails, imageFile: File): Promise<any> {
   try {
-    const docRef = await addDoc(collection(firestore, 'pins'), {
-      ...users_data,
-      img_url: '',
+    const db = getDatabase();
+    await set(ref(db, 'pins/' + pins_metadata.imageId), {
+      author: pins_metadata.author,
+      board: pins_metadata.board,
+      description: pins_metadata.description,
+      pin_size: pins_metadata.pin_size,
+      tags: pins_metadata.tags,
+      imageId: pins_metadata.imageId,
+      img_url: pins_metadata.img_url,
+      title: pins_metadata.title,
     });
-    const storage = getStorage();
-    const storageRef = ref(storage, docRef.id);
-    let compressedImg = await compressImage(imageFile);
-    if (!compressedImg) {
-      return;
-    }
-    await uploadBytes(storageRef, compressedImg)
-      .then((snapshot) => {
-        console.log('Uploaded image for pin: ' + docRef.id);
-        getDownloadURL(snapshot.ref)
-          .then((url) => {
-            updateDoc(docRef, { img_url: url })
-              .then(() => {
-                console.log('Update of pin successful!');
-              })
-              .catch((error) => {
-                console.log(error);
-              });
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-    doc_snap = await getDoc(docRef);
-    return doc_snap.data();
-  } catch (e) {
-    console.error('Error adding document: ', e);
+    return 1;
+  } catch (error) {
+    console.error('Error adding document: ', error);
+    return 0;
   }
 }
 
@@ -74,30 +50,31 @@ async function compressImage(imageFile: File): Promise<File | undefined> {
     compressedFile = await imageCompression(imageFile, options);
   } catch (error) {
     console.log(error);
+    toast.error('Error compressing image');
   }
   return compressedFile;
 }
 
 export async function deletePinBackend(pin_details: PinDetails): Promise<void> {
-  const storage = getStorage();
-  const pinRef = ref(storage, pin_details.id);
+  // const storage = getStorage();
+  // const pinRef = ref(storage, pin_details.id);
 
-  try {
-    await deleteDoc(doc(firestore, 'pins', pin_details.id)).then(() => {
-       deleteObject(pinRef)
-      .then(() => {
-        console.log('File deleted successfully');
-      })
-      .catch((e) => {
-        console.log('Uh-oh, an error occurred!');
-      });
-    })
+  // try {
+  //   await deleteDoc(doc(firestore, 'pins', pin_details.id)).then(() => {
+  //      deleteObject(pinRef)
+  //     .then(() => {
+  //       console.log('File deleted successfully');
+  //     })
+  //     .catch((e) => {
+  //       console.log('Uh-oh, an error occurred!');
+  //     });
+  //   })
 
-  } catch (e) {
-    console.error('Error deleting document: ', e);
-  }
+  // } catch (e) {
+  //   console.error('Error deleting document: ', e);
+  // }
 }
 
-export async function updatePinBackend(e: React.FormEvent, users_data: PinData): Promise<void> {
+export async function updatePinBackend(e: React.FormEvent, pins_metadata: PinData): Promise<void> {
   // Placeholder
 }
