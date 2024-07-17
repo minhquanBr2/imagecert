@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { firestore } from './firebase_setup/firebase';
 import AuthContext from './context/AuthContext';
 import LoginScreen from './pages/Login';
+import { SSLClient } from './service/handShake';
 firestore
 
 
@@ -14,11 +15,14 @@ firestore
 const  App = () =>  {
 
   const { user } = useContext(AuthContext);
+  const client : SSLClient = new SSLClient();
+  client.startHandshake();
 
   return (
     <React.Fragment>
       <ToastContainer/>
       {user ? <FinalBoard /> : <LoginScreen/>}
+      {/* <KeyManager/> */}
     </React.Fragment>
   );
 }

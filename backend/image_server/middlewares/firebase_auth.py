@@ -1,7 +1,6 @@
 from fastapi import Request, HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from firebase_admin import auth
-from fastapi.responses import JSONResponse
 
 
 exclude_paths = [
@@ -9,7 +8,6 @@ exclude_paths = [
     "/redoc",
     "/openapi.json",
 ]
-
 
 
 class FirebaseAuthMiddleware(BaseHTTPMiddleware):
@@ -20,7 +18,6 @@ class FirebaseAuthMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         # Exclude SwaggerUI and Redoc paths
-        exclude_paths = ["/docs", "/redoc", "/openapi.json"]
         for exclude_path in exclude_paths:
             if request.url.path.startswith(exclude_path):
                 return await call_next(request)
@@ -28,20 +25,14 @@ class FirebaseAuthMiddleware(BaseHTTPMiddleware):
         token = request.headers.get("Authorization")
 
         if not token:
-            return JSONResponse(
-                status_code=401,
-                content={"detail": "Authorization token missing"}
-            )
+            raise HTTPException(status_code=401, detail="Authorization token missing")
         
         token = token.split("Bearer ")[-1]
         try:
             decoded_token = auth.verify_id_token(token)
             request.state.user = decoded_token
         except Exception as e:
-            return JSONResponse(
-                status_code=401,
-                content={"detail": f"Invalid or expired token: {str(e)}"}
-            )
+            raise HTTPException(status_code=401, detail=f"Invalid or expired token: {str(e)}")
 
         response = await call_next(request)
         return response

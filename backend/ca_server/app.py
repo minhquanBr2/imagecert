@@ -12,6 +12,35 @@ from cryptography.hazmat.backends import default_backend
 from middleware.verifyToken import FirebaseAuthMiddleware
 from middleware.encryptDecrypt import session_keys
 from fastapi.middleware.cors import CORSMiddleware
+import firebase_admin
+from middleware.firebase_config import firebaseConfig
+import json
+
+class ClientHelloRequest(BaseModel):
+    client_hello: str
+    client_uid: str
+    sessionID: str
+
+class ServerHelloResponse(BaseModel):
+    server_hello: str
+    server_public_key: str
+
+class KeyExchangeResponse(BaseModel):
+    key_exchange: str
+
+class VerifyRequest(BaseModel):
+    session_id: str
+    encrypted_message: str
+
+class SessionInfo(BaseModel):
+    client_uid: str
+    session_key: str
+    session_id: str
+
+class EncryptedPayloadRequest(BaseModel):
+    data: str
+
+firebase_admin.initialize_app(options=firebaseConfig)
 
 app = FastAPI()
 
@@ -137,46 +166,28 @@ async def verify_endpoint(request: VerifyRequest):
 
     return {"certificate": cert_pem}
 
-
-class ClientHelloRequest(BaseModel):
-    client_hello: str
-    client_uid: str
-
-class ServerHelloResponse(BaseModel):
-    server_hello: str
-    server_public_key: str
-
-class KeyExchangeResponse(BaseModel):
-    key_exchange: str
-
-class VerifyRequest(BaseModel):
-    session_id: str
-    encrypted_message: str
-
-class SessionInfo(BaseModel):
-    client_uid: str
-    session_key: str
-
 @app.post("/client_hello")
-async def client_hello(request: ClientHelloRequest):
+async def client_hello(request: ClientHelloRequest, auth_request: Request):
     if request.client_hello != 'Hello from Client':
-        raise HTTPException(status_code=400, detail="Invalid client hello message.")
+        return {"message": "Invalid client hello message.", 'status_code': 400}
 
-    if not request.state.user:
-        raise HTTPException(status_code=403, detail="Unauthorized. User not authenticated.")
+    if not auth_request.state.user:
+        return {"message": "Unauthorized. User not authenticated.", "status_code": 403}
     
     # Get client's UID and client hello message
-    auth_uid = request.state.user.uid
+    print('auth_request.state:', auth_request.state.user)
+    auth_uid = auth_request.state.user["uid"]
     client_uid = request.client_uid
     if auth_uid != client_uid:
         raise HTTPException(status_code=403, detail="Unauthorized. UID does not match.")
 
-    # Get sessionn ID
-    session_id = request.session_id
-    session_keys[session_id] = {
-        'client_uid': client_uid,
+    # Generate a session ID
+    session_id = request.sessionID
+    session_keys[client_uid] = {
+        'session_id': session_id,
         'session_key': None
     }
+
     # Handle client hello and respond with server hello
     server_hello_response = {
         'server_hello': 'Hello from CA Server',
@@ -199,28 +210,45 @@ async def key_exchange():
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/store_session_key")
-async def store_session_key(request: SessionInfo):
-    session_id = request.session_id
-    client_uid = request.client_uid
-    session_key = request.session_key
+async def store_session_key(request: EncryptedPayloadRequest):
+    try:
+        encrypted_payload_base64 = request.data
 
-    if session_id not in session_keys:
-        raise HTTPException(status_code=400, detail="Session ID not found.")
+        # Decode the base64 encoded payload
+        encrypted_payload = base64.b64decode(encrypted_payload_base64)
+        ca_private_key = load_ca_private_key()
+        decrypted_payload = ca_private_key.decrypt(
+                encrypted_payload,
+                padding.OAEP(
+                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                    algorithm=hashes.SHA256(),
+                    label=None
+                )
+            )
+
+        # Convert the decrypted payload from bytes to a string
+        decrypted_payload_str = decrypted_payload.decode('utf-8')
+
+        # Parse the JSON string to extract the payload
+        payload = json.loads(decrypted_payload_str)
+        print(payload)
+
+        session_id = payload.get('session_id')
+        session_key = payload.get('session_key')
+        client_uid = payload.get('client_uid')
+        
+
+        if client_uid not in session_keys:
+            return {"message": "Session ID not found.", "status_code": 400}
+            
+
+        # session_keys[session_id]['session_key'] = base64.b64decode(session_key.encode())
+        session_keys[client_uid]['session_key'] = session_key
+        print('`session_keys`:', session_keys)
+        return {"message": "Session key stored successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
     
-    # decrypt the session key using ca private key
-    ca_private_key = load_ca_private_key()
-    session_key = ca_private_key.decrypt(
-        base64.b64decode(session_key.encode()),
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
-        )
-    )
-
-    session_keys[session_id]['session_key'] = base64.b64decode(session_key.encode())
-    print('`session_keys`:', session_keys)
-    return {"message": "Session key stored successfully."}
 
 if __name__ == '__main__':
     import uvicorn
