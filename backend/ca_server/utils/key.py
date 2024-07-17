@@ -2,6 +2,8 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.backends import default_backend
 import os
+import base64
+from ..middleware.encryptDecrypt import session_keys 
 
 # Generate and store CA's key pair if not already present
 def generate_ca_key_pair():
@@ -29,10 +31,28 @@ def generate_ca_key_pair():
 
 # Load CA's private key
 def load_ca_private_key():
-    with open('ca_private_key.pem', 'rb') as f:
-        private_key = serialization.load_pem_private_key(
-            f.read(),
-            password=None,
-            backend=default_backend()
-        )
-    return private_key
+    if os.path.exists('ca_private_key.pem'):
+        with open('ca_private_key.pem', 'rb') as f:
+            private_key = serialization.load_pem_private_key(
+                f.read(),
+                password=None,
+                backend=default_backend()
+            )
+        return private_key
+    else:
+        raise FileNotFoundError("CA private key file not found.")
+
+def load_ca_public_key():
+    if os.path.exists('ca_public_key.pem'):
+        with open('ca_public_key.pem', 'rb') as f:
+            public_key = serialization.load_pem_public_key(
+                f.read(),
+                backend=default_backend()
+            )
+        return public_key
+    else:
+        raise FileNotFoundError("CA public key file not found.")
+
+def store_session_key(session_id: str, encrypted_session_key: str):
+    # Store encrypted session key with session ID
+    session_keys[session_id] = base64.b64decode(encrypted_session_key.encode())

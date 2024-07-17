@@ -1,9 +1,12 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
+from cryptography import x509
+from cryptography.x509.oid import NameOID
+from datetime import datetime, timedelta
 import os
 import base64
-from utils.key import generate_ca_key_pair, load_ca_private_key
-from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from utils.key import generate_ca_key_pair, load_ca_private_key, load_ca_public_key
+from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.backends import default_backend
 
@@ -16,8 +19,19 @@ class VerifyRequest(BaseModel):
     user_public_key: str
     challenge_response: str
 
+class CSRRequest(BaseModel):
+    csr: str
+
 generate_ca_key_pair()
-challenge = os.urandom(32)  # Generating a challenge for the demo purpose
+# Store for challenges associated with public keys
+challenge_store = {}
+
+class PublicKeyRequest(BaseModel):
+    user_public_key: str
+
+class VerifyRequest(BaseModel):
+    user_public_key: str
+    challenge_response: str
 
 @app.get("/")
 async def index():
@@ -28,13 +42,26 @@ async def challenge_endpoint(request: PublicKeyRequest):
     user_public_key_pem = request.user_public_key
     user_public_key = serialization.load_pem_public_key(
         user_public_key_pem.encode(),
-        backend=default_backend()
+        backend=serialization.DefaultBackend()
     )
-    
-    challenge_base64 = base64.b64encode(challenge).decode('utf-8')
-    
+
+    challenge = os.urandom(32)  # Generate a random challenge
+    challenge_store[user_public_key_pem] = challenge  # Store the challenge for later verification
+
+    # Encrypt the challenge using the user's public key
+    encrypted_challenge = user_public_key.encrypt(
+        challenge,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+
+    encrypted_challenge_base64 = base64.b64encode(encrypted_challenge).decode('utf-8')
+
     response = {
-        'challenge': challenge_base64
+        'challenge': encrypted_challenge_base64
     }
     return response
 
@@ -42,34 +69,103 @@ async def challenge_endpoint(request: PublicKeyRequest):
 async def verify_endpoint(request: VerifyRequest):
     user_public_key_pem = request.user_public_key
     challenge_response = base64.b64decode(request.challenge_response)
-    
+
+    if user_public_key_pem not in challenge_store:
+        raise HTTPException(status_code=400, detail="Challenge not found for the provided public key.")
+
+    challenge = challenge_store.pop(user_public_key_pem)  # Get the stored challenge
+
     user_public_key = serialization.load_pem_public_key(
         user_public_key_pem.encode(),
-        backend=default_backend()
+        backend=serialization.DefaultBackend()
     )
-    
+
     try:
+        # Verify the response is the decrypted challenge
         user_public_key.verify(
             challenge_response,
             challenge,
             padding.PKCS1v15(),
             hashes.SHA256()
         )
-    except:
-        return {"error": "Verification failed."}, 400
-    
-    ca_private_key = load_ca_private_key()
-    signature = ca_private_key.sign(
-        user_public_key_pem.encode(),
-        padding.PKCS1v15(),
-        hashes.SHA256()
-    )
-    
-    response = {
-        'signature': base64.b64encode(signature).decode('utf-8')
-    }
-    return response
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Verification failed: " + str(e))
 
+    # Proceed to sign the certificate
+    ca_private_key = load_ca_private_key()
+    subject = issuer = x509.Name([
+        x509.NameAttribute(NameOID.COUNTRY_NAME, u"VN"),
+        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"HCMCity"),
+        x509.NameAttribute(NameOID.LOCALITY_NAME, u"HCMUS"),
+        x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"HCMUSMHUD"),
+        x509.NameAttribute(NameOID.COMMON_NAME, u"myca.example.com"),
+    ])
+
+    cert = x509.CertificateBuilder().subject_name(
+        subject
+    ).issuer_name(
+        issuer
+    ).public_key(
+        user_public_key
+    ).serial_number(
+        x509.random_serial_number()
+    ).not_valid_before(
+        datetime.utcnow()
+    ).not_valid_after(
+        datetime.utcnow() + timedelta(days=365)
+    ).add_extension(
+        x509.SubjectAlternativeName([x509.DNSName(u"localhost")]),
+        critical=False,
+    ).sign(ca_private_key, hashes.SHA256(), default_backend())
+
+    # TODO: SAVE CERTI TO CERTI DB
+    cert_pem = cert.public_bytes(serialization.Encoding.PEM).decode('utf-8')
+
+    return {"certificate": cert_pem}
+
+
+class ClientHelloRequest(BaseModel):
+    client_hello: str
+    client_uid: str
+
+class ServerHelloResponse(BaseModel):
+    server_hello: str
+    server_public_key: str
+
+class KeyExchangeResponse(BaseModel):
+    key_exchange: str
+
+class VerifyRequest(BaseModel):
+    session_id: str
+    encrypted_message: str
+
+class SessionInfo(BaseModel):
+    client_uid: str
+    session_key: str
+
+@app.post("/client_hello")
+async def client_hello(request: ClientHelloRequest):
+    # Handle client hello and respond with server hello
+    server_hello_response = {
+        'server_hello': 'Hello from CA Server',
+    }
+    return server_hello_response
+
+@app.post("/key_exchange")
+async def key_exchange():
+    # Respond with CA server's public key
+    try:
+        ca_public_key = load_ca_public_key()
+        key_exchange_response = {
+            'key_exchange': ca_public_key.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo
+            ).decode('utf-8')
+        }
+        return key_exchange_response
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
 if __name__ == '__main__':
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
