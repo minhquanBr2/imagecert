@@ -67,16 +67,15 @@ class KeyStore {
             req.onupgradeneeded = (evt: any) => {
                 this.db = evt.target.result;
                 if (this.db && !this.db.objectStoreNames.contains(this.objectStoreName)) {
-                    const objStore = this.db.createObjectStore(this.objectStoreName, { autoIncrement: true });
-                    objStore.createIndex("name", "name", { unique: false });
-                    objStore.createIndex("spki", "spki", { unique: false });
+                    const objStore = this.db.createObjectStore(this.objectStoreName, { keyPath: "id", autoIncrement: true });
+                    objStore.createIndex("userUID", "userUID", { unique: false });
                 }
             };
         });
     }
 
 
-    savePrivateKey(privateKey: CryptoKey, name: string): Promise<any> {
+    savePrivateKey(privateKey: CryptoKey, userUID: string): Promise<any> {
         return new Promise((fulfill, reject) => {
             if (!this.db) {
                 return reject(new Error("KeyStore is not open."));
@@ -84,10 +83,11 @@ class KeyStore {
 
             const savedObject = {
                 privateKey: privateKey,
-                name: name
+                userUID: userUID
             };
 
-            const transaction = this.db!.transaction([this.objectStoreName], "readwrite");
+
+            const transaction = this.db.transaction([this.objectStoreName], "readwrite");
             transaction.onerror = (evt: any) => reject(evt.error);
             transaction.onabort = (evt: any) => reject(evt.error);
             transaction.oncomplete = () => fulfill(savedObject);
@@ -98,7 +98,7 @@ class KeyStore {
     }
 
 
-    getPrivateKeyByName(name: string): Promise<any> {
+    getPrivateKeyByUserUID(userUID: string): Promise<any> {
         return new Promise((fulfill, reject) => {
             if (!this.db) {
                 return reject(new Error("KeyStore is not open."));
@@ -106,7 +106,7 @@ class KeyStore {
 
             const transaction = this.db.transaction([this.objectStoreName], "readonly");
             const objectStore = transaction.objectStore(this.objectStoreName);
-            const request = objectStore.index("name").get(name);
+            const request = objectStore.index("userUID").get(userUID);
 
             request.onsuccess = (evt: any) => fulfill(evt.target.result);
             request.onerror = (evt: any) => reject(evt.target.error);
