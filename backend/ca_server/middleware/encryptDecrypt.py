@@ -7,7 +7,7 @@ from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.kdf import KeyDerivationFunction
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
-session_keys = {}
+from shared import session_keys
 
 
 # Middleware to decrypt incoming requests using session key
