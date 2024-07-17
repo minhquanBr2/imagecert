@@ -8,7 +8,7 @@ def create_table_user():
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS user (
-            userUID INTEGER PRIMARY KEY,
+            userUID TEXT PRIMARY KEY,
             publicKey TEXT NOT NULL,
             role INTEGER NOT NULL       
         );

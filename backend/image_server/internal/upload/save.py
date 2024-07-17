@@ -24,7 +24,7 @@ def save_hash(imageID, hash):
     
 
 def save_verification_status(imageID, result, verificationTimestamp):
-    insert_verification_status(imageID, 0, result, verificationTimestamp)
+    insert_verification_status(imageID, "", result, verificationTimestamp)
 
 
 def save_uploaded_data_to_db(userUID, originalFilename, filename, temp_filepath, verificationStatus, hash):
