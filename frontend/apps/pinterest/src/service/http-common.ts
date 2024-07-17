@@ -1,5 +1,9 @@
 import axios from 'axios';
 import { API_URL, AUTH_KEY, CA_URL } from '../type/constant';
+import { getAuth, signOut } from 'firebase/auth';
+import { useContext } from 'react';
+import AuthContext from '../context/AuthContext';
+import { logOutUser } from '../utils/authUtils';
 
 if (!API_URL) {
   throw new Error('API_URL is not defined in the constants file');
@@ -29,4 +33,13 @@ export const ca_http = axios.create({
   },
 });
 
-;
+ca_http.interceptors.response.use(
+  response => response,
+  error => {
+    console.error('API Error:', error);
+    if (error.response.status === 401 && error.response.data.detail.includes('expired')) {
+      logOutUser();
+    }
+    return Promise.reject(error);
+  }
+);

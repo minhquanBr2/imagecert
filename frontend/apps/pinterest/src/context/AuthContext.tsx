@@ -40,6 +40,7 @@ export class AuthProvider extends Component<Props, State> {
 			this.setState({
 				user: null,
 			})
+			localStorage.removeItem(AUTH_KEY); // Clear local storage
 		}).catch((error) => {
 			console.log('logout error: ', error)
 		});

@@ -2,7 +2,7 @@ import CryptoJS from 'crypto-js';
 import {ca_http} from './http-common';
 import { useContext } from 'react';
 import AuthContext from '../context/AuthContext';
-
+import forge from 'node-forge';
 
 
 export class SSLClient {
@@ -11,37 +11,60 @@ export class SSLClient {
 
   async startHandshake() {
     const { user } = useContext(AuthContext);
-    try {
+    // Store session ID and key for future requests
+    this.sessionID = this.generateSessionID();
 
-       // Store session ID and key for future requests
-       this.sessionID = this.generateSessionID();
+    // Step 1: ClientHello
+    // console.log('ClientHello User:', user);
+    const clientHelloResponse = await ca_http.post('/client_hello', {
+      client_hello: 'Hello from Client',
+      client_uid: user?.uid,
+      sessionID : this.sessionID
+    });
 
-      // Step 1: ClientHello
-      const clientHelloResponse = await ca_http.post('/client_hello', {
-        client_hello: 'Hello from client',
-        client_uid: user?.uid,
-        sessionID : this.sessionID
-      });
+    if (clientHelloResponse.status !== 200) {
+      throw new Error(`ClientHello failed with message: ${clientHelloResponse.data}`);
+    }
 
-      
-      // Step 2: KeyExchange (Receive CA Server's public key)
-      const keyExchangeResponse = await ca_http.post('/key_exchange');
-      const serverPublicKey = keyExchangeResponse.data.key_exchange;
+    
+    // Step 2: KeyExchange (Receive CA Server's public key)
+    const keyExchangeResponse = await ca_http.post('/key_exchange');
+    if (keyExchangeResponse.status !== 200) {
+      throw new Error(`ClientHello failed with message: ${keyExchangeResponse.data}`);
+    }
+    const serverPublicKey = keyExchangeResponse.data.key_exchange;
+    const serverPublicKey_forge = forge.pki.publicKeyFromPem(serverPublicKey);
+    // console.log('Server public key:', serverPublicKey);
 
-      // Generate session key
-      this.sessionKey = this.generateSessionKey();
+    // Generate session key
+    this.sessionKey = this.generateSessionKey();
 
-      // Encrypt session key using server's public key
-      const encryptedSessionKey = this.encryptSessionKey(this.sessionKey, serverPublicKey);
+    const payload = {
+      session_id: this.sessionID,
+      session_key: this.sessionKey,
+      client_uid: user?.uid,
+    };
 
-     
-      await ca_http.post('/store_session_key', {
-        session_id: this.sessionID,
-        session_key: encryptedSessionKey,
-      });
+    // Convert the payload to a JSON string
+    const payloadString = JSON.stringify(payload);
 
-    } catch (error) {
-      console.error('Handshake failed:', error);
+    // Encrypt the entire payload with the server's public key
+    const encryptedPayload = serverPublicKey_forge.encrypt(payloadString, 'RSA-OAEP', {
+      md: forge.md.sha256.create(),
+      mgf1: forge.mgf.mgf1.create(forge.md.sha256.create()),
+    });
+
+    // Convert the encrypted payload to base64
+    const encryptedPayloadBase64 = forge.util.encode64(encryptedPayload);
+
+    // Send the encrypted payload to the server
+    const storeKeyResponse = await ca_http.post('/store_session_key', {
+      data: encryptedPayloadBase64,
+    });
+
+    console.log('Store Key Response:', storeKeyResponse.data);
+    if (storeKeyResponse.status !== 200) {
+      throw new Error(`ClientHello failed with message: ${storeKeyResponse.data}`);
     }
   }
 
@@ -89,9 +112,12 @@ export class SSLClient {
   }
 
   encryptSessionKey(sessionKey: string, serverPublicKey: string): string {
-    // Encrypt session key using server's public key (simplified for example)
-    // Replace with actual RSA encryption using serverPublicKey
-    return sessionKey; // For demonstration, we're returning the sessionKey as is.
+    const publicKey = forge.pki.publicKeyFromPem(serverPublicKey);
+    const encrypted = publicKey.encrypt(sessionKey, 'RSA-OAEP', {
+      md: forge.md.sha256.create(),
+      mgf1: forge.mgf.mgf1.create(forge.md.sha256.create())
+    });
+    return forge.util.encode64(encrypted);
   }
 
   encryptMessage(sessionKey: string, message: string): string {
