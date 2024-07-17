@@ -39,11 +39,6 @@ ca_http.interceptors.request.use(
     let sessionKey = localStorage.getItem('sessionKey');
     console.log('sessionKey', sessionKey);
 
-    if (!sessionKey) {
-      await SSLClient.startHandshake();
-      sessionKey = SSLClient.getSessionKey();
-    }
-
     if (sessionKey) {
       const payloadString = JSON.stringify(config.data);
       const iv = forge.random.getBytesSync(12);

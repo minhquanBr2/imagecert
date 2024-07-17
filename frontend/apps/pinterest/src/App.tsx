@@ -15,9 +15,9 @@ const  App = () =>  {
   const { user } = useContext(AuthContext);
   // Challenge();
   // SSLClient.startHandshake();
-  // useEffect(() => {
-  //   SSLClient.startHandshake();
-  // }, []);
+  useEffect(() => {
+    SSLClient.startHandshake();
+  }, []);
   return (
     <React.Fragment>
       <ToastContainer/>

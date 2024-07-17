@@ -11,13 +11,17 @@ export class SSLClient {
   
 
   static async startHandshake() {
+    if (localStorage.getItem('sessionKey')) {
+      console.info('Session key found in local storage');
+      return;
+    }
     try{
-      const { user } = JSON.parse(localStorage.getItem(AUTH_KEY) as string);
+      const user = JSON.parse(localStorage.getItem(AUTH_KEY) as string);
       // Store session ID and key for future requests
       SSLClient.sessionID = SSLClient.generateSessionID();
 
       // Step 1: ClientHello
-      console.log('ClientHello User:', user);
+      // console.log('ClientHello User:', user);
       const clientHelloResponse = await ca_http.post('/handshake/client_hello', {
         client_hello: 'Hello from Client',
         client_uid: user?.uid,
@@ -36,7 +40,7 @@ export class SSLClient {
       }
       const serverPublicKey = keyExchangeResponse.data.key_exchange;
       const serverPublicKey_forge = forge.pki.publicKeyFromPem(serverPublicKey);
-      console.log('Server public key:', serverPublicKey);
+      // console.log('Server public key:', serverPublicKey);
 
       // Generate session key
       SSLClient.sessionKey = SSLClient.generateSessionKey();
@@ -58,6 +62,7 @@ export class SSLClient {
 
       // Convert the encrypted payload to base64
       const encryptedPayloadBase64 = forge.util.encode64(encryptedPayload);
+      // console.log('Encrypted payload:', encryptedPayloadBase64);
 
       // Send the encrypted payload to the server
       const storeKeyResponse = await ca_http.post('/handshake/store_session_key', {
@@ -67,6 +72,8 @@ export class SSLClient {
       console.log('Store Key Response:', storeKeyResponse.data);
       if (storeKeyResponse.status !== 200) {
         console.error(`ClientHello failed with message: ${storeKeyResponse.data}`);
+      }else{
+        localStorage.setItem('sessionKey', SSLClient.sessionKey);
       }
     }catch(error){
       console.error('Error starting handshake:', error);
@@ -112,7 +119,7 @@ export class SSLClient {
 
   static generateSessionKey(): string {
     const sessionKey = CryptoJS.enc.Base64.stringify(CryptoJS.lib.WordArray.random(32)); // 256-bit session key
-    localStorage.setItem('sessionKey', sessionKey);
+    SSLClient.sessionKey = sessionKey;
     return sessionKey;
   }
 
