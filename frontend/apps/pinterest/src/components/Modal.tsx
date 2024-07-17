@@ -31,8 +31,9 @@ function uploadImage(event: React.ChangeEvent<HTMLInputElement>, pinDetails: any
 
 async function savePin(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, e: React.MouseEvent<HTMLDivElement>, pinDetails: PinData, refreshPins: () => void) {
   setIsLoading(true);
-  console.log('pinDetails', pinDetails);
-  const user = JSON.parse(localStorage.getItem('user') as string);
+  
+  const user = JSON.parse(localStorage.getItem('auth') as string);
+  console.log('pinDetails', pinDetails, user);
   const pin_metadata : PinDetails = {
     ...pinDetails,
     author: user.uid,
@@ -40,7 +41,6 @@ async function savePin(setIsLoading: React.Dispatch<React.SetStateAction<boolean
     title: (document.querySelector('#pin_title') as HTMLInputElement).value,
     description: (document.querySelector('#pin_description') as HTMLInputElement).value,
     pin_size: (document.querySelector('#pin_size') as HTMLSelectElement).value,
-    imageId: new Date().toISOString().replace(/[^0-9-]/g, ''),
     tags: pinDetails.tags,
   };
 
