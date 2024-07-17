@@ -9,8 +9,22 @@ from utils.key import generate_ca_key_pair, load_ca_private_key, load_ca_public_
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.backends import default_backend
+from middleware.verifyToken import FirebaseAuthMiddleware
+from middleware.encryptDecrypt import session_keys
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.add_middleware(FirebaseAuthMiddleware)
+
+
 
 class PublicKeyRequest(BaseModel):
     user_public_key: str
@@ -145,6 +159,24 @@ class SessionInfo(BaseModel):
 
 @app.post("/client_hello")
 async def client_hello(request: ClientHelloRequest):
+    if request.client_hello != 'Hello from Client':
+        raise HTTPException(status_code=400, detail="Invalid client hello message.")
+
+    if not request.state.user:
+        raise HTTPException(status_code=403, detail="Unauthorized. User not authenticated.")
+    
+    # Get client's UID and client hello message
+    auth_uid = request.state.user.uid
+    client_uid = request.client_uid
+    if auth_uid != client_uid:
+        raise HTTPException(status_code=403, detail="Unauthorized. UID does not match.")
+
+    # Get sessionn ID
+    session_id = request.session_id
+    session_keys[session_id] = {
+        'client_uid': client_uid,
+        'session_key': None
+    }
     # Handle client hello and respond with server hello
     server_hello_response = {
         'server_hello': 'Hello from CA Server',
@@ -165,7 +197,32 @@ async def key_exchange():
         return key_exchange_response
     except FileNotFoundError as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/store_session_key")
+async def store_session_key(request: SessionInfo):
+    session_id = request.session_id
+    client_uid = request.client_uid
+    session_key = request.session_key
+
+    if session_id not in session_keys:
+        raise HTTPException(status_code=400, detail="Session ID not found.")
     
+    # decrypt the session key using ca private key
+    ca_private_key = load_ca_private_key()
+    session_key = ca_private_key.decrypt(
+        base64.b64decode(session_key.encode()),
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+
+    session_keys[session_id]['session_key'] = base64.b64decode(session_key.encode())
+    print('`session_keys`:', session_keys)
+    return {"message": "Session key stored successfully."}
+
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    uvicorn.run(app, host="0.0.0.0", port=8002)
