@@ -86,7 +86,6 @@ class KeyStore {
                 userUID: userUID
             };
 
-
             const transaction = this.db.transaction([this.objectStoreName], "readwrite");
             transaction.onerror = (evt: any) => reject(evt.error);
             transaction.onabort = (evt: any) => reject(evt.error);

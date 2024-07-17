@@ -22,7 +22,8 @@ class FirebaseAuthMiddleware(BaseHTTPMiddleware):
             if request.url.path.startswith(exclude_path):
                 return await call_next(request)
         
-        token = request.headers.get("Authorization")
+        print("middleware request headers: ", request.headers)
+        token = request.headers.get("authorization")
 
         if not token:
             raise HTTPException(status_code=401, detail="Authorization token missing")
