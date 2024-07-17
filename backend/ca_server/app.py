@@ -40,13 +40,6 @@ generate_ca_key_pair()
 # Store for challenges associated with public keys
 challenge_store = {}
 
-class PublicKeyRequest(BaseModel):
-    user_public_key: str
-
-class VerifyRequest(BaseModel):
-    user_public_key: str
-    challenge_response: str
-
 @app.get("/")
 async def index():
     return {"message": "CA Server is running."}
