@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Request, Form, File, UploadFile, HTTPException
-from fastapi.responses import JSONResponse
 import sys 
 sys.path.append('..')
 from internal.upload.save import save_uploaded_data_to_db, save_webp_image, save_temp_image
 from internal.upload.self_verify import self_verify_image
-from internal.upload.preprocess import verify_signature
-from schemas.request_schemas import RequestUploadImage
+from schemas.request_schemas import RequestUploadPublicKey
 import config
+from db.db_insert import insert_key_certi
 
 
 router = APIRouter(
@@ -17,29 +16,44 @@ router = APIRouter(
 
 @router.post("/image")
 async def upload_image(request: Request, signature: str = Form(...), file: UploadFile = File(...)):
-
     user_uid = request.state.user['uid']                                    # Access the user UID from Firebase token
     print(f"File {file.filename} received from user {user_uid}.")
-    if verify_signature(user_uid, signature) == False:
-        raise HTTPException(status_code=401, detail=f"Signature verification failed.")
     
-    try: 
-        
+    try:         
         original_filename, filename, temp_filepath = save_temp_image(file)
         verification_status, hash_object, ref_filepath = self_verify_image(temp_filepath)
         print(f"Verification status: {verification_status}.")
 
         if verification_status == config.VERIFICATION_STATUS["ACCEPTED"]:
             perm_filepath = save_webp_image(temp_filepath)
-            save_uploaded_data_to_db(user_uid, original_filename, filename, temp_filepath, verification_status, hash_object)
-            # TODO: prompt user to select private key file, next request only need to send the signature
+            save_uploaded_data_to_db(user_uid, original_filename, filename, temp_filepath, signature, verification_status, hash_object)
             return {"message": f"Image {original_filename} registered successfully. Please sign the image."}
         elif verification_status == config.VERIFICATION_STATUS["PENDING"]:
             perm_filepath = save_webp_image(temp_filepath)
-            save_uploaded_data_to_db(user_uid, original_filename, filename, perm_filepath, verification_status, hash_object)
+            save_uploaded_data_to_db(user_uid, original_filename, filename, perm_filepath, signature, verification_status, hash_object)
             return {"message": f"Image {original_filename} is under consideration."}
         else:
             return {"message": f"Image {original_filename} is rejected. A reference image can be found at {ref_filepath}."}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.post("/key")
+async def upload_key(request: RequestUploadPublicKey):    
+    user_uid = request.state.user['uid']                                    # Access the user UID from Firebase token
+    certi_url = request.certi_url
+    issuer_name = request.issuer_name
+    not_before = request.not_before
+    not_after = request.not_after
+    status = request.status
+    public_key = request.public_key
+    print(f"Public key {public_key[:10]}...{public_key[-10:]} received from user {user_uid}.")
+    
+    try:
+        insert_key_certi(user_uid, certi_url, issuer_name, not_before, not_after, status, public_key)
+        return {"message": "Public key registered successfully."}
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 

@@ -39,7 +39,7 @@ def insert_key_certi(userUID, certiURL, issuerName, notBefore, notAfter, status,
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO key_certi (userUID, certiURL, issuerName, notBefore, notAfter, status, publicKey)
+        INSERT INTO keyCerti (userUID, certiURL, issuerName, notBefore, notAfter, status, publicKey)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     ''', (userUID, certiURL, issuerName, notBefore, notAfter, status, publicKey))
     conn.commit()

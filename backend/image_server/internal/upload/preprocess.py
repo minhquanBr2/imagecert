@@ -6,9 +6,3 @@ def generate_image_name():
     hash_object = hashlib.sha256(timestamp.encode())
     hex_digest = hash_object.hexdigest()
     return hex_digest
-
-
-def verify_signature(user_uid: str, signature: str):
-    if signature == "":
-        return False
-    return True
