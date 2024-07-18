@@ -9,6 +9,11 @@ from cryptography.hazmat.primitives import serialization, hashes
 from utils.key import load_ca_private_key, load_ca_public_key
 from cryptography.hazmat.primitives.asymmetric import padding
 import base64
+from cryptography import x509
+from cryptography.x509.oid import NameOID
+from datetime import datetime, timedelta
+from cryptography.hazmat.backends import default_backend
+import json
 
 router = APIRouter(
     prefix = '/zkp',
@@ -20,15 +25,27 @@ challenge_store = {}
 
 
 @router.post("/challenge")
-async def challenge_endpoint(request: PublicKeyRequest):
-    user_public_key_pem = request.user_public_key
+async def challenge_endpoint(request: Request):
+    data = request.state.decrypted_payload
+    data = json.loads(data)
+    user_uid = data.get("user_id")
+    user_public_key_pem = data.get("user_public_key")
     user_public_key = serialization.load_pem_public_key(
         user_public_key_pem.encode(),
         backend=serialization.DefaultBackend()
     )
+    print('\nchallenge_endpoint', data, user_uid, user_public_key)
+    
+    if not user_uid or not user_public_key:
+        raise HTTPException(status_code=422, detail="user_uid and user_public_key are required")
+    
+    if not session_keys.get(user_uid):
+        return JSONResponse(content={"message": "Unauthorized. User not authenticated in any session. Please handshake first"}, status_code=403)
+    # if not session_keys[user_uid]:
+    #     return JSONResponse(content={"message": "Unauthorized. User not authenticated in any session. Please handshake first"}, status_code=403)
 
     challenge = os.urandom(32)  # Generate a random challenge
-    challenge_store[user_public_key_pem] = challenge  # Store the challenge for later verification
+    challenge_store[user_public_key] = challenge  # Store the challenge for later verification
 
     # Encrypt the challenge using the user's public key
     encrypted_challenge = user_public_key.encrypt(

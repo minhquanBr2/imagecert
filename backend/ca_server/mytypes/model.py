@@ -26,6 +26,7 @@ class EncryptedPayloadRequest(BaseModel):
 
 class PublicKeyRequest(BaseModel):
     user_public_key: str
+    user_id: str
 
 class CSRRequest(BaseModel):
     csr: str
