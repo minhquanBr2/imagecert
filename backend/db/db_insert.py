@@ -33,3 +33,14 @@ def insert_verification_status(imageID, adminUID, result, verificationTimestamp)
     ''', (imageID, adminUID, result, verificationTimestamp))
     conn.commit()
     conn.close()
+
+
+def insert_key_certi(userUID, certiURL, issuerName, notBefore, notAfter, status, publicKey):
+    conn = sqlite3.connect(config.IMAGEDB_PATH)
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO key_certi (userUID, certiURL, issuerName, notBefore, notAfter, status, publicKey)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ''', (userUID, certiURL, issuerName, notBefore, notAfter, status, publicKey))
+    conn.commit()
+    conn.close()

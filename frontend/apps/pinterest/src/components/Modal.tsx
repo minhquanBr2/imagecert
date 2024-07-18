@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import TagsCreator from './TagsCreator'; // Adjust the import according to your file structure
 import LoadingIcon from './LoadingIcon'; // Adjust the import according to your file structure
 import { savePinBackend } from '../firebase_setup/DatabaseOperations';
@@ -7,9 +7,9 @@ import { checkSize } from '../utils/checkSize';
 import '../styles/modal_styles.css';
 import { toast } from 'react-toastify';
 import { ImageServices } from '../service/image';
+import KeyManager from './KeyManager';
 
 let img_file : File;
-
 
 function uploadImage(event: React.ChangeEvent<HTMLInputElement>, pinDetails: any, setPinDetails: React.Dispatch<React.SetStateAction<any>>, setShowLabel: React.Dispatch<React.SetStateAction<boolean>>, setShowModalPin: React.Dispatch<React.SetStateAction<boolean>>) {
   if (event.target.files && event.target.files[0]) {
@@ -29,7 +29,12 @@ function uploadImage(event: React.ChangeEvent<HTMLInputElement>, pinDetails: any
   }
 }
 
-async function savePin(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, e: React.MouseEvent<HTMLDivElement>, pinDetails: PinData, refreshPins: () => void) {
+async function savePin(
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, 
+  e: React.MouseEvent<HTMLDivElement>, 
+  pinDetails: PinData, 
+  refreshPins: () => void,
+  userUID: string) {
   setIsLoading(true);
   
   const user = JSON.parse(localStorage.getItem('auth') as string);
@@ -45,8 +50,9 @@ async function savePin(setIsLoading: React.Dispatch<React.SetStateAction<boolean
   };
 
   console.log('pin_metadata', pin_metadata);
-
-  ImageServices.uploadImage(img_file).then((response) => {
+  const signature = await KeyManager.signImage(userUID, img_file);
+  console.log('Signature:', signature);  
+  ImageServices.uploadImage(img_file, signature).then((response) => {
     console.log(response);
     if (response.status === 200) {
       //TODO: add save image to BackEnd endpoints
@@ -167,7 +173,7 @@ const Modal: React.FC<ModalProps> = (props) => {
                 <option value='large'>Large</option>
               </select>
               <div
-                onClick={(e) => savePin(setIsLoading, e, pinDetails, props.refreshPins)}
+                onClick={(e) => savePin(setIsLoading, e, pinDetails, props.refreshPins, props.userUID)}
                 className='save_pin'
               >
                 Save

@@ -43,7 +43,7 @@ const LoginScreen: React.FC = () => {
     <div className="login-wrapper">
       <div className="login-container">
         <img
-          src="https://cdn.worldvectorlogo.com/logos/pinterest-1.svg"
+          src="/pinterest-seeklogo.svg"
           alt="Pinterest logo"
         />
         <div className="login-text">

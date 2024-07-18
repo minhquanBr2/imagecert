@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Request, Form, File, UploadFile, HTTPException
-from fastapi.responses import JSONResponse
-from internal.admin_verify import display
+from fastapi import APIRouter, HTTPException
+from internal.admin_verify import display, verify
+from schemas.request_schemas import RequestVerifyImage
 import os
 
 router = APIRouter(
@@ -8,7 +8,19 @@ router = APIRouter(
     tags = ['admin_verify'],
 )
 
+
 @router.get("/get_pendings")
 async def get_pending_images():
-    image_urls = display.get_pending_images()
-    return {"image_urls": image_urls}
+    return display.get_pending_images()
+
+
+@router.post("/verify")
+async def verify_image(request: RequestVerifyImage):
+    try:
+        image_id = request.image_id
+        admin_uid = request.admin_uid
+        result = request.result
+        verify.verify_image(image_id, admin_uid, result)
+        return {"message": "Image verification status updated successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")

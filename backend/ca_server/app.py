@@ -8,6 +8,7 @@ from routes import challenge, handshake
 from utils.key import generate_ca_key_pair
 
 firebase_admin.initialize_app(options=firebaseConfig)
+from db.db_insert import insert_key_certi
 
 app = FastAPI()
 

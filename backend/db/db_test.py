@@ -39,7 +39,20 @@ def test_verification_status():
     conn.close()
 
 
+def test_key_certi():
+    conn = sqlite3.connect(config.IMAGEDB_PATH)
+    cursor = conn.cursor()
+    query = 'SELECT * FROM keyCerti'
+    cursor.execute(query)
+    # print the result
+    for row in cursor.fetchall():
+        print(row)
+    conn.commit()
+    conn.close()
+
+
 if __name__ == "__main__":
     test_image()   
     test_hash()
     test_verification_status()
+    test_key_certi()

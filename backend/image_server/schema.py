@@ -2,7 +2,6 @@
 from fastapi import FastAPI, Depends, Query
 from typing import List, Dict, Optional
 from pydantic import BaseModel
-import aiosqlite
 from fastapi.middleware.cors import CORSMiddleware
 import math
 
