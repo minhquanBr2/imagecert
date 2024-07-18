@@ -12,6 +12,9 @@ import KeyStore from './KeyStore';
 import KeyManager from './KeyManager';
 import IndexedDBServices from '../service/indexDB';
 import AuthContext from '../context/AuthContext';
+import PopUpContent from './PopUpContent';
+import "../styles/popup_content_styles.css";
+
 
 const FinalBoard: React.FC = () => {
   const animateRef = useRef(null);
@@ -165,8 +168,8 @@ const FinalBoard: React.FC = () => {
         {showOpenPin ? <OpenPin setShowOpenPin={setShowOpenPin} pinDetails={pinDetails} deletePin={deletePin} /> : null}
       </div>
       {showLoading ? <LoadingIcon /> : null}
-      <Popup trigger={<button> Trigger</button>} position="right center">
-        <div>Popup content here !!</div>
+      <Popup position="right center">
+        <PopUpContent/>
       </Popup>
     </div>
   );
