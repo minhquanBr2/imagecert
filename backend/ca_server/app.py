@@ -17,6 +17,7 @@ app.add_middleware(
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_credentials=True
 )
 app.add_middleware(FirebaseAuthMiddleware)
 app.add_middleware(EncryptMiddleware)
