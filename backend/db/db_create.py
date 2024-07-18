@@ -88,9 +88,29 @@ def create_table_image_certi():
     conn.close()
 
 
+def create_table_key_certi():
+    conn = db_connect.connect_db()
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS keyCerti (
+            certiID INTEGER PRIMARY KEY AUTOINCREMENT,
+            userUID INTEGER NOT NULL,
+            certiURL TEXT NOT NULL,
+            issuerName TEXT NOT NULL,
+            notBefore TEXT NOT NULL,
+            notAfter TEXT NOT NULL,
+            status INT NOT NULL,
+            publicKey TEXT NOT NULL
+        );
+    ''')
+    conn.commit()
+    conn.close()
+
+
 if __name__ == "__main__":
-    create_table_user()
-    create_table_image()
-    create_table_hash()
-    create_table_verification_status()
-    create_table_image_certi()
+    # create_table_user()
+    # create_table_image()
+    # create_table_hash()
+    # create_table_verification_status()
+    # create_table_image_certi()
+    create_table_key_certi()

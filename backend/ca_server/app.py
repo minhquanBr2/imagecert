@@ -12,6 +12,7 @@ from cryptography.hazmat.backends import default_backend
 from middleware.verifyToken import FirebaseAuthMiddleware
 from middleware.encryptDecrypt import session_keys
 from fastapi.middleware.cors import CORSMiddleware
+from db.db_insert import insert_key_certi
 
 app = FastAPI()
 
@@ -127,6 +128,14 @@ async def verify_endpoint(request: VerifyRequest):
 
     # TODO: SAVE CERTI TO CERTI DB
     cert_pem = cert.public_bytes(serialization.Encoding.PEM).decode('utf-8')
+    insert_key_certi(
+        userUID = request.state.user, 
+        certiURL = cert_pem, 
+        issuerName = "", 
+        notBefore = "", 
+        notAfter = "", 
+        status = "", 
+        publicKey = user_public_key_pem)
 
     return {"certificate": cert_pem}
 
