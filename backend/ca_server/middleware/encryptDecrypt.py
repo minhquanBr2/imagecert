@@ -7,7 +7,7 @@ from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.kdf import KeyDerivationFunction
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
-session_keys = {}
+from shared import session_keys
 
 
 # Middleware to decrypt incoming requests using session key
@@ -38,3 +38,61 @@ async def encrypt_response(request: Request, call_next):
             response.body = encrypted_body
 
     return response
+
+import os
+import json
+from fastapi import FastAPI, Request, Response
+from starlette.middleware.base import BaseHTTPMiddleware
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+from base64 import b64encode, b64decode
+from shared import session_keys
+
+# Middleware to decrypt request
+class DecryptMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        if request.method in ["POST", "PUT", "PATCH"]:
+            body = await request.body()
+            if body:
+                data = json.loads(body)
+                session_key = request.headers.get("X-Session-Key")
+                if session_key and "iv" in data and "payload" in data and "tag" in data:
+                    iv = b64decode(data["iv"])
+                    encrypted_payload = b64decode(data["payload"])
+                    tag = b64decode(data["tag"])
+                    
+                    cipher = AES.new(b64decode(session_key), AES.MODE_GCM, iv)
+                    decrypted_payload = cipher.decrypt_and_verify(encrypted_payload, tag)
+                    
+                    request._body = decrypted_payload
+                    request.headers["content-length"] = str(len(decrypted_payload))
+
+        response = await call_next(request)
+        return response
+
+# Middleware to encrypt response
+class EncryptMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        if response.status_code == 200 and response.headers.get("content-type") == "application/json":
+            session_key = request.headers.get("X-Session-Key")
+            if session_key:
+                data = await response.body()
+                if data:
+                    iv = get_random_bytes(12)
+                    cipher = AES.new(b64decode(session_key), AES.MODE_GCM, iv)
+                    encrypted_payload, tag = cipher.encrypt_and_digest(data)
+                    
+                    encrypted_response = {
+                        "iv": b64encode(iv).decode(),
+                        "payload": b64encode(encrypted_payload).decode(),
+                        "tag": b64encode(tag).decode()
+                    }
+                    
+                    return Response(
+                        content=json.dumps(encrypted_response),
+                        media_type="application/json",
+                        status_code=response.status_code
+                    )
+        return response
+

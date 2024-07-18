@@ -40,6 +40,7 @@ ca_http.interceptors.request.use(
     console.log('sessionKey', sessionKey);
 
     if (sessionKey) {
+      console.log('REQUEST WITH ENCRYPTED');
       const payloadString = JSON.stringify(config.data);
       const iv = forge.random.getBytesSync(12);
       const cipher = forge.cipher.createCipher('AES-GCM', forge.util.decode64(sessionKey));
@@ -67,6 +68,7 @@ ca_http.interceptors.response.use(
     let sessionKey = localStorage.getItem('sessionKey');
 
     if (sessionKey && response.data && response.data.iv && response.data.payload && response.data.tag) {
+      console.log('RESPONSE WITH DECRYPTED');
       const iv = forge.util.decode64(response.data.iv);
       const encryptedPayload = forge.util.decode64(response.data.payload);
       const tag = forge.util.decode64(response.data.tag);
