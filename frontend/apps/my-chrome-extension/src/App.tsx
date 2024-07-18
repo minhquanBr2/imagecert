@@ -27,7 +27,7 @@ const App: React.FC = () => {
     //     toast.error('Error signing in');
     //   }
     // });
-    console.log("Sign in with Google", localStorage.getItem("token"));
+    console.log("Sign in with Google", sessionStorage.getItem("token"));
   };
   useEffect(() => {
     console.log(tab);

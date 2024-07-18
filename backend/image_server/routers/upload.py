@@ -16,12 +16,10 @@ router = APIRouter(
 
 
 @router.post("/image")
-async def upload_image(request: RequestUploadImage, file: UploadFile = File(...)):
+async def upload_image(request: Request, signature: str = Form(...), file: UploadFile = File(...)):
 
-    # user_uid = request.state.user['uid']                                    # Access the user UID from Firebase token
-    user_uid = "abc"
+    user_uid = request.state.user['uid']                                    # Access the user UID from Firebase token
     print(f"File {file.filename} received from user {user_uid}.")
-    signature = request.signature
     if verify_signature(user_uid, signature) == False:
         raise HTTPException(status_code=401, detail=f"Signature verification failed.")
     

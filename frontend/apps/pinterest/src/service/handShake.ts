@@ -11,12 +11,12 @@ export class SSLClient {
   
 
   static async startHandshake() {
-    if (localStorage.getItem('sessionKey')) {
+    if (sessionStorage.getItem('sessionKey')) {
       console.info('Session key found in local storage');
       return;
     }
     try{
-      const user = JSON.parse(localStorage.getItem(AUTH_KEY) as string);
+      const user = JSON.parse(sessionStorage.getItem(AUTH_KEY) as string);
       // Store session ID and key for future requests
       SSLClient.sessionID = SSLClient.generateSessionID();
 
@@ -73,7 +73,7 @@ export class SSLClient {
       if (storeKeyResponse.status !== 200) {
         console.error(`ClientHello failed with message: ${storeKeyResponse.data}`);
       }else{
-        localStorage.setItem('sessionKey', SSLClient.sessionKey);
+        sessionStorage.setItem('sessionKey', SSLClient.sessionKey);
       }
     }catch(error){
       console.error('Error starting handshake:', error);
@@ -82,7 +82,7 @@ export class SSLClient {
 
   static generateSessionID(): string {
     const sessionID = Math.random().toString(36).substr(2, 9); // Generate random session ID
-    localStorage.setItem('sessionID', sessionID);
+    sessionStorage.setItem('sessionID', sessionID);
     return sessionID;
   }
 
@@ -117,11 +117,11 @@ export class SSLClient {
 
   // static getSessionKey() {
   //   if (!SSLClient.sessionKey) {
-  //     SSLClient.sessionKey = localStorage.getItem('sessionKey');
+  //     SSLClient.sessionKey = sessionStorage.getItem('sessionKey');
   //   }
-  //   if (!localStorage.getItem('sessionKey')) {
+  //   if (!sessionStorage.getItem('sessionKey')) {
   //     throw new Error('Session key not found');
   //   }
-  //   return SSLClient.sessionKey || forge.util.decode64(localStorage.getItem('sessionKey') as string);
+  //   return SSLClient.sessionKey || forge.util.decode64(sessionStorage.getItem('sessionKey') as string);
   // }
 }

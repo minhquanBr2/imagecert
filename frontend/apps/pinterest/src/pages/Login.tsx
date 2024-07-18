@@ -27,7 +27,7 @@ const LoginScreen: React.FC = () => {
       };
   
       try {
-        window.localStorage.setItem(AUTH_KEY, JSON.stringify(authData));
+        window.sessionStorage.setItem(AUTH_KEY, JSON.stringify(authData));
       } catch (err) {
         console.error('Error saving auth to local storage', err);
       }

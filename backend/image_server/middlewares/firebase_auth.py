@@ -22,12 +22,12 @@ class FirebaseAuthMiddleware(BaseHTTPMiddleware):
             if request.url.path.startswith(exclude_path):
                 return await call_next(request)
         
-        token = request.headers.get("Authorization")
+        token = request.headers.get("authorization").split("Bearer ")[-1]
+        print(f"Token: {token}")
 
         if not token:
             raise HTTPException(status_code=401, detail="Authorization token missing")
         
-        token = token.split("Bearer ")[-1]
         try:
             decoded_token = auth.verify_id_token(token)
             request.state.user = decoded_token

@@ -24,7 +24,7 @@ export class AuthProvider extends Component<Props, State> {
 		super(props)
 
 		this.state = {
-			user: localStorage.getItem(AUTH_KEY) ? JSON.parse(localStorage.getItem(AUTH_KEY) as string) : null,
+			user: sessionStorage.getItem(AUTH_KEY) ? JSON.parse(sessionStorage.getItem(AUTH_KEY) as string) : null,
 		}
 	}
 
@@ -40,11 +40,11 @@ export class AuthProvider extends Component<Props, State> {
 			this.setState({
 				user: null,
 			})
-			localStorage.removeItem(AUTH_KEY); // Clear local storage
-			if (localStorage.getItem('sessionKey'))
-				localStorage.removeItem('sessionKey');
-			if (localStorage.getItem('sessionID'))
-				localStorage.removeItem('sessionID');
+			sessionStorage.removeItem(AUTH_KEY); // Clear local storage
+			if (sessionStorage.getItem('sessionKey'))
+				sessionStorage.removeItem('sessionKey');
+			if (sessionStorage.getItem('sessionID'))
+				sessionStorage.removeItem('sessionID');
 		}).catch((error) => {
 			console.log('logout error: ', error)
 		});

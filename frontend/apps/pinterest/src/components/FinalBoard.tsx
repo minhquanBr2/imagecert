@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useContext, useEffect } from 'react';
 import { deletePinBackend, fetchPinsBackend } from '../firebase_setup/DatabaseOperations.ts';
 import { Tooltip } from 'antd';
 
@@ -7,8 +7,13 @@ import autoAnimate from '@formkit/auto-animate';
 import { Header, LoadingIcon, Modal, OpenPin, Pin } from './index.ts';
 import RandomPin from './RandomPin.tsx';
 import { PinDetails } from '../interface/PinData.ts';
+import KeyStore from './KeyStore';
+import KeyManager from './KeyManager';
+import IndexedDBServices from '../service/indexDB';
+import AuthContext from '../context/AuthContext';
 import { Challenge } from '../service/caChallenge.ts';
 import { getCertForPubkey } from '../service/signPublicKey.ts';
+import { arrayBufferToBase64 } from '../utils/bufferToBase64.ts';
 
 const FinalBoard: React.FC = () => {
   const animateRef = useRef(null);
@@ -19,6 +24,29 @@ const FinalBoard: React.FC = () => {
   const [showGuidelines, setShowGuidelines] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
   const [pinDetails, setPinDetails] = useState<PinDetails | null>(null);
+  const { user } = useContext(AuthContext);
+  const userUID = user?.uid;
+
+  useEffect(() => {
+    console.log("User UID: ", userUID);
+    const generateAndStoreKeys = async () => {
+      try {
+        const existingPrivateKey = await IndexedDBServices.getItem("userPrivateKeyStore", userUID as string);
+        if (existingPrivateKey) {
+          console.log('Private key found in IndexedDB');
+        } else {
+          const { publicKey, privateKey } = await KeyManager.generateKeyPair();     // type: buffer
+          console.log('Public key: ', publicKey);
+          await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, arrayBufferToBase64(privateKey));
+          await IndexedDBServices.setItem("userPublicKeyStore", userUID as string, arrayBufferToBase64(publicKey));
+        }
+      } catch (error) {
+        console.error('Error generating or storing keys:', error);
+      }
+    };
+
+    generateAndStoreKeys();
+  }, [userUID]); // Dependency array includes userUID
 
   const fetchPins = async () => {
     let pinsArray: any[] = [];
@@ -94,7 +122,7 @@ const FinalBoard: React.FC = () => {
         }}
         className='add_pin_modal_container'
       >
-        {showModal ? <Modal setShowModal={setShowModal} refreshPins={refreshPins} /> : null}
+        {showModal ? <Modal setShowModal={setShowModal} refreshPins={refreshPins} userUID={userUID as string}/> : null}
       </div>
       <div 
        onClick={(event) => {

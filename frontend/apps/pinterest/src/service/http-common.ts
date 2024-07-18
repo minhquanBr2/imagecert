@@ -2,18 +2,16 @@ import axios from 'axios';
 import { API_URL, AUTH_KEY, CA_URL } from '../type/constant';
 import { logOutUser } from '../utils/authUtils';
 import forge from 'node-forge';
-import { SSLClient } from './handShake';
 
 if (!API_URL) {
   console.error('API_URL is not defined in the constants file');
 }
 
-const authData = localStorage.getItem(AUTH_KEY);
+const authData = sessionStorage.getItem(AUTH_KEY);
 let token = null;
 
 if (authData) {
   token = JSON.parse(authData).accessToken;
-  console.log('authData', authData, token);
 } else {
   console.error('Auth is not defined in the local storage');
 }
@@ -36,8 +34,7 @@ export const ca_http = axios.create({
 
 ca_http.interceptors.request.use(
   async (config) => {
-    let sessionKey = localStorage.getItem('sessionKey');
-    console.log('sessionKey', sessionKey);
+    let sessionKey = sessionStorage.getItem('sessionKey');
 
     if (sessionKey) {
       console.log('REQUEST WITH ENCRYPTED');
@@ -65,7 +62,7 @@ ca_http.interceptors.request.use(
 
 ca_http.interceptors.response.use(
   response => {
-    let sessionKey = localStorage.getItem('sessionKey');
+    let sessionKey = sessionStorage.getItem('sessionKey');
 
     if (sessionKey && response.data && response.data.iv && response.data.payload && response.data.tag) {
       console.log('RESPONSE WITH DECRYPTED');
@@ -90,7 +87,7 @@ ca_http.interceptors.response.use(
   },
   error => {
     console.error('API Error:', error);
-    if (error.response.status === 401 && error.response.data.detail.includes('expired')) {
+    if (error.response.data.status === 401 && error.response.data.detail.includes('expired')) {
       logOutUser();
     }
     return Promise.reject(error);
