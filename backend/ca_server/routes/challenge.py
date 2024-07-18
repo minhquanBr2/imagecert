@@ -2,7 +2,6 @@ from fastapi import APIRouter, Request, Form, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 import sys 
 sys.path.append('..')
-from mytypes.model import VerifyRequest, PublicKeyRequest
 import os
 from middleware.encryptDecrypt import session_keys
 from cryptography.hazmat.primitives import serialization, hashes
@@ -30,10 +29,15 @@ async def challenge_endpoint(request: Request):
     data = json.loads(data)
     user_uid = data.get("user_id")
     user_public_key_pem = data.get("user_public_key")
-    user_public_key = serialization.load_pem_public_key(
-        user_public_key_pem.encode(),
-        backend=serialization.DefaultBackend()
+    public_key_der = base64.b64decode(user_public_key_pem)
+    user_public_key = serialization.load_der_public_key(
+        public_key_der,
+        backend=default_backend()
     )
+    # user_public_key = serialization.load_pem_public_key(
+    #     user_public_key_pem.encode(),
+    #     backend=default_backend()
+    # )
     print('\nchallenge_endpoint', data, user_uid, user_public_key)
     
     if not user_uid or not user_public_key:
@@ -45,7 +49,10 @@ async def challenge_endpoint(request: Request):
     #     return JSONResponse(content={"message": "Unauthorized. User not authenticated in any session. Please handshake first"}, status_code=403)
 
     challenge = os.urandom(32)  # Generate a random challenge
-    challenge_store[user_public_key] = challenge  # Store the challenge for later verification
+    print('challenge', challenge)
+    challenge_base64 = base64.b64encode(challenge).decode('utf-8')
+    print('challenge_base64', challenge_base64)
+    challenge_store[user_uid] = challenge  # Store the challenge for later verification
 
     # Encrypt the challenge using the user's public key
     encrypted_challenge = user_public_key.encrypt(
@@ -65,30 +72,44 @@ async def challenge_endpoint(request: Request):
     return response
 
 @router.post("/verify")
-async def verify_endpoint(request: VerifyRequest):
-    user_public_key_pem = request.user_public_key
-    challenge_response = base64.b64decode(request.challenge_response)
-
-    if user_public_key_pem not in challenge_store:
-        raise HTTPException(status_code=400, detail="Challenge not found for the provided public key.")
-
-    challenge = challenge_store.pop(user_public_key_pem)  # Get the stored challenge
-
-    user_public_key = serialization.load_pem_public_key(
-        user_public_key_pem.encode(),
-        backend=serialization.DefaultBackend()
+async def verify_endpoint(request: Request):
+    data = request.state.decrypted_payload
+    data = json.loads(data)
+    user_uid = data.get("user_id")
+    user_public_key_pem = data.get("user_public_key")
+    print('\nverify_endpoint', data, user_uid, user_public_key_pem)
+    public_key_der = base64.b64decode(user_public_key_pem)
+    user_public_key = serialization.load_der_public_key(
+        public_key_der,
+        backend=default_backend()
     )
+    challenge_response = base64.b64decode(data.get("challenge_response"))
 
-    try:
-        # Verify the response is the decrypted challenge
-        user_public_key.verify(
-            challenge_response,
-            challenge,
-            padding.PKCS1v15(),
-            hashes.SHA256()
-        )
-    except Exception as e:
-        raise HTTPException(status_code=400, detail="Verification failed: " + str(e))
+    if user_uid not in challenge_store:
+        return JSONResponse(content={"message": "Challenge not found for the provided public key."}, status_code=400)
+        
+        
+
+    challenge = challenge_store.pop(user_uid)  # Get the stored challenge
+
+    # user_public_key = serialization.load_pem_public_key(
+    #     user_public_key_pem.encode(),
+    #     backend=default_backend()
+    # )
+
+    # try:
+    #     # Verify the response is the decrypted challenge
+    #     user_public_key.verify(
+    #         challenge_response,
+    #         challenge,
+    #         padding.PKCS1v15(),
+    #         hashes.SHA256()
+    #     )
+    # except Exception as e:
+    #     raise HTTPException(status_code=400, detail="Verification failed: " + str(e))
+
+    if challenge_response != challenge:
+        return JSONResponse(content={"message": "Verification failed. Challenge response does not match the challenge."}, status_code=400)
 
     # Proceed to sign the certificate
     ca_private_key = load_ca_private_key()
@@ -119,5 +140,5 @@ async def verify_endpoint(request: VerifyRequest):
 
     # TODO: SAVE CERTI TO CERTI DB
     cert_pem = cert.public_bytes(serialization.Encoding.PEM).decode('utf-8')
-
+    print(cert_pem)
     return {"certificate": cert_pem}

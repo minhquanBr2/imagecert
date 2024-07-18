@@ -12,6 +12,9 @@ firebase_admin.initialize_app(options=firebaseConfig)
 app = FastAPI()
 
 # Add CORS middleware
+app.add_middleware(FirebaseAuthMiddleware)
+app.add_middleware(EncryptMiddleware)
+app.add_middleware(DecryptMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,9 +22,6 @@ app.add_middleware(
     allow_headers=["*"],
     allow_credentials=True
 )
-app.add_middleware(FirebaseAuthMiddleware)
-app.add_middleware(EncryptMiddleware)
-app.add_middleware(DecryptMiddleware)
 
 generate_ca_key_pair()
 
