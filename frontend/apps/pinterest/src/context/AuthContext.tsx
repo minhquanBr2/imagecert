@@ -41,6 +41,10 @@ export class AuthProvider extends Component<Props, State> {
 				user: null,
 			})
 			localStorage.removeItem(AUTH_KEY); // Clear local storage
+			if (localStorage.getItem('sessionKey'))
+				localStorage.removeItem('sessionKey');
+			if (localStorage.getItem('sessionID'))
+				localStorage.removeItem('sessionID');
 		}).catch((error) => {
 			console.log('logout error: ', error)
 		});

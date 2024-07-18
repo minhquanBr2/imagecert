@@ -1,3 +1,4 @@
+import { Challenge } from "./caChallenge";
 import { SSLClient } from "./handShake";
 
 
@@ -9,7 +10,17 @@ export const getCertForPubkey = async (pubkey: string) => {
       await SSLClient.startHandshake();
     }
 
+    Challenge(pubkey).then((response) => {
+      console.log('response', response);
+      localStorage.removeItem('sessionKey');
+    localStorage.removeItem('sessionID');
+    }).catch((error) => {
+      console.log('error', error);
+      localStorage.removeItem('sessionKey');
+    localStorage.removeItem('sessionID');
+    });
 
+    
 
   }catch(error){
     console.error('Error getting cert for public key:', error);

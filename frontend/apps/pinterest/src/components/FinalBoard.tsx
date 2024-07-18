@@ -8,6 +8,7 @@ import { Header, LoadingIcon, Modal, OpenPin, Pin } from './index.ts';
 import RandomPin from './RandomPin.tsx';
 import { PinDetails } from '../interface/PinData.ts';
 import { Challenge } from '../service/caChallenge.ts';
+import { getCertForPubkey } from '../service/signPublicKey.ts';
 
 const FinalBoard: React.FC = () => {
   const animateRef = useRef(null);
@@ -70,7 +71,7 @@ const FinalBoard: React.FC = () => {
 
   return (
     <div style={{ overflow: 'hidden', height: '100dvh', width: '100dvw' }} ref={animateRef}>
-      <button onClick={() => Challenge('aaa')}>Challenge</button>
+      <button onClick={() => getCertForPubkey("user_public_key")}>Challenge</button>
       <div className='header_container' id='header_bar'>
         <Header pinsToFilter={pinsFromDb} filterPins={filterPins} />
       </div>
