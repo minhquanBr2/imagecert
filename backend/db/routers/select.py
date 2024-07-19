@@ -9,9 +9,8 @@ router = APIRouter(
 )
 
 
-@router.post("/key_certi")
-async def select_key_certi(request: RequestRetrievePublicKeyCerti):
-    user_uid = request.user_uid
+@router.get("/key_certi/{user_uid}")
+async def select_key_certi(user_uid: str):
     print(f"Retrieving public key certificate corresponding with user {user_uid}...")
     
     try:
@@ -24,16 +23,14 @@ async def select_key_certi(request: RequestRetrievePublicKeyCerti):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-@router.post("/image")
-async def select_image(request: RequestRetrieveImage):
-    image_id = request.image_id
-    attributes = request.attributes
+@router.get("/image/original/{image_id}")
+async def select_image_original_filename(image_id: int):
     print(f"Retrieving image {image_id}...")
     
     try:
-        results = db_select.select_image(image_id, attributes)
-        if results == None:
-            return {"message": f"Image {image_id} not found."}
+        results = db_select.select_image(image_id, ['originalFilename'])
+        if results == None or results == []:
+            return {"message": f"Image with ID {image_id} not found."}
         return {"message": results}
 
     except Exception as e:

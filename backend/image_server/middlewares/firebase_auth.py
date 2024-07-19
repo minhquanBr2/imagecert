@@ -23,7 +23,7 @@ class FirebaseAuthMiddleware(BaseHTTPMiddleware):
                 return await call_next(request)
         
         token = request.headers.get("authorization").split("Bearer ")[-1]
-        print(f"Token: {token}")
+        print(f"Token: {token[:10]}...{token[-10:]}")
 
         if not token:
             raise HTTPException(status_code=401, detail="Authorization token missing")

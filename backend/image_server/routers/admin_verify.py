@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from internal.admin_verify import display, verify
 from schemas.request_schemas import RequestVerifyImage
 import os
@@ -15,10 +15,12 @@ async def get_pending_images():
 
 
 @router.post("/verify")
-async def verify_image(request: RequestVerifyImage):
+async def verify_image(req: Request, request: RequestVerifyImage):
+    admin_uid = req.state.user['uid']                                    # Access the user UID from Firebase token
+    print(f"Verification request received from admin {admin_uid}.")
+
     try:
         image_id = request.image_id
-        admin_uid = request.admin_uid
         result = request.result
         verify.verify_image(image_id, admin_uid, result)
         return {"message": "Image verification status updated successfully."}

@@ -4,9 +4,8 @@ import requests
 
 
 def get_original_filename(image_id):
-    data = {"image_id": image_id}
-    url = f"{config.DB_ENDPOINT_URL}/select/image"
-    response = requests.post(url, data)
+    url = f"{config.DB_ENDPOINT_URL}/select/image/original/{image_id}"
+    response = requests.get(url)
     if response.status_code != 200:
         return None
 

@@ -1,13 +1,13 @@
 from internal.upload.extract_metadata import extract_metadata
 from internal.upload.preprocess import generate_image_name
-import time
+import datetime
 import cv2
 import os
 import config
 import requests
 
 
-def save_image(userUID, originalFilename, filename, temp_filepath, signature):
+async def save_image(userUID, originalFilename, filename, temp_filepath, signature):
     metadata = extract_metadata(temp_filepath)
     data = {
         "user_uid": userUID,
@@ -20,26 +20,28 @@ def save_image(userUID, originalFilename, filename, temp_filepath, signature):
         "signature": signature
     }
     url = f"{config.DB_ENDPOINT_URL}/insert/image"
-    response = requests.post(url, data)
+    response = requests.post(url, json = data)
     if response.status_code == 200:
-        return response.json()["message"]["image_id"]
+        print(f"Image {originalFilename} saved to db with new file name as {filename}.")
+        return int(response.json()["message"]["image_id"])
     return None
 
 
-def save_hash(imageID, hash):
+async def save_hash(imageID, hash):
     data = {
         "image_id": imageID,
         "hash_type": hash["type"],
         "value": hash["value"]
     }
     url = f"{config.DB_ENDPOINT_URL}/insert/hash"
-    response = requests.post(url, data)
+    response = requests.post(url, json = data)
     if response.status_code != 200:
-        print(f"Error saving hash for image {imageID}.")
-        return None
+        print(f"Error saving hash for image with ID {imageID}.")
+    else:
+        print(f"Hash saved for image with ID {imageID}.")
     
 
-def save_verification_status(imageID, result, verificationTimestamp):
+async def save_verification_status(imageID, result, verificationTimestamp):
     data = {
         "image_id": imageID,
         "admin_uid": "",
@@ -47,16 +49,17 @@ def save_verification_status(imageID, result, verificationTimestamp):
         "verification_timestamp": verificationTimestamp
     }
     url = f"{config.DB_ENDPOINT_URL}/insert/verification_status"
-    response = requests.post(url, data)
+    response = requests.post(url, json = data)
     if response.status_code != 200:
-        print(f"Error saving verification status for image {imageID}.")
-        return None
+        print(f"Error saving verification status for image with ID {imageID}.")
+    else:
+        print(f"Verification status saved for image with ID {imageID}.")
 
 
-def save_uploaded_data_to_db(userUID, originalFilename, filename, temp_filepath, signature, verificationStatus, hash):
-    imageID = save_image(userUID, originalFilename, filename, temp_filepath, signature)
-    save_hash(imageID, hash)
-    save_verification_status(imageID, verificationStatus, time.time())
+async def save_uploaded_data_to_db(userUID, originalFilename, filename, temp_filepath, signature, verificationStatus, hash):
+    imageID = await save_image(userUID, originalFilename, filename, temp_filepath, signature)
+    await save_hash(imageID, hash)
+    await save_verification_status(imageID, verificationStatus, datetime.datetime.now().strftime('%Y:%m:%d %H:%M:%S.%f'))
 
 
 def save_webp_image(filepath):

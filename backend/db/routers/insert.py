@@ -62,7 +62,6 @@ async def insert_verification_status(request: RequestUploadVerificationStatus):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-
 @router.post("/key_certi")
 async def insert_key_certi(request: RequestUploadPublicKeyCerti):
     user_uid = request.user_uid

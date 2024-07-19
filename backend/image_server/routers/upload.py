@@ -24,11 +24,11 @@ async def upload_image(request: Request, signature: str = Form(...), file: Uploa
 
         if verification_status == config.VERIFICATION_STATUS["ACCEPTED"]:
             perm_filepath = save_webp_image(temp_filepath)
-            save_uploaded_data_to_db(user_uid, original_filename, filename, temp_filepath, signature, verification_status, hash_object)
-            return {"message": f"Image {original_filename} registered successfully. Please sign the image."}
+            await save_uploaded_data_to_db(user_uid, original_filename, filename, temp_filepath, signature, verification_status, hash_object)
+            return {"message": f"Image {original_filename} registered successfully."}
         elif verification_status == config.VERIFICATION_STATUS["PENDING"]:
             perm_filepath = save_webp_image(temp_filepath)
-            save_uploaded_data_to_db(user_uid, original_filename, filename, perm_filepath, signature, verification_status, hash_object)
+            await save_uploaded_data_to_db(user_uid, original_filename, filename, perm_filepath, signature, verification_status, hash_object)
             return {"message": f"Image {original_filename} is under consideration."}
         else:
             return {"message": f"Image {original_filename} is rejected. A reference image can be found at {ref_filepath}."}

@@ -57,6 +57,7 @@ class KeyManager {
   
 
   public static async importPrivateKey(privateKeyArrayBuffer: ArrayBuffer): Promise<{ privateKey: CryptoKey }> {
+    console.log("privateKeyArrayBuffer", privateKeyArrayBuffer);
     const privateKey = await window.crypto.subtle.importKey(
       "pkcs8",
       privateKeyArrayBuffer,
@@ -91,7 +92,7 @@ class KeyManager {
     const arrayBuffer = await imageFile.arrayBuffer();  
     const signature = await window.crypto.subtle.sign(
       'RSASSA-PKCS1-v1_5',
-      privateKey,
+      privateKey.privateKey,
       arrayBuffer
     );
     return Buffer.from(signature).toString('base64');
