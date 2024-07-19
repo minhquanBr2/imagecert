@@ -55,7 +55,7 @@ const FinalBoard: React.FC = () => {
   const handleGenerateNewKeyPair = async () => {
     try {
       const { publicKey, privateKey } = await KeyManager.generateKeyPair(userUID as string);
-      const privateKeyCryptoObject = await KeyManager.importKey(privateKey);
+      const privateKeyCryptoObject = await KeyManager.importPrivateKey(privateKey);
       await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKeyCryptoObject);
       setShowGenerateKeyPopUp(false);
     } catch (error) {
@@ -76,12 +76,14 @@ const FinalBoard: React.FC = () => {
     let publicKeyFile: File | null = null;
     let privateKeyFile: File | null = null;
     for (let i = 0; i < files.length; i++) {
-      if (files[i].name.endswith('.pub')) {
+      if (files[i].name.endsWith('.pub')) {
         publicKeyFile = files[i];
       } else {
         privateKeyFile = files[i];
       }
     }
+    console.log('Public key file: ', publicKeyFile);
+    console.log('Private key file: ', privateKeyFile);
 
     // Ensure both public and private key files are identified
     if (!publicKeyFile || !privateKeyFile) {
@@ -93,7 +95,7 @@ const FinalBoard: React.FC = () => {
     try {
       const privateKey = await privateKeyFile.arrayBuffer();
       const privateKeyCryptoObject = await KeyManager.importPrivateKey(privateKey);
-      await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKeyCryptoObject);
+      // await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKeyCryptoObject);         // only do this after ZKP challenge
 
       const publicKey = await publicKeyFile.arrayBuffer();
       const publicKeyCryptoObject = await KeyManager.importPublicKey(publicKey);

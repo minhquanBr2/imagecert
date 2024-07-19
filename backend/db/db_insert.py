@@ -1,6 +1,7 @@
 import sqlite3
 import config
 
+
 def insert_image(userUID, originalFilename, filename, timestamp, caption, location, deviceName, signature):
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()

@@ -3,9 +3,7 @@ import sys
 sys.path.append('..')
 from internal.upload.save import save_uploaded_data_to_db, save_webp_image, save_temp_image
 from internal.upload.self_verify import self_verify_image
-from schemas.request_schemas import RequestUploadPublicKey
 import config
-from db.db_insert import insert_key_certi
 
 
 router = APIRouter(
@@ -39,23 +37,23 @@ async def upload_image(request: Request, signature: str = Form(...), file: Uploa
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-@router.post("/key")
-async def upload_key(request: RequestUploadPublicKey):    
-    user_uid = request.state.user['uid']                                    # Access the user UID from Firebase token
-    certi_url = request.certi_url
-    issuer_name = request.issuer_name
-    not_before = request.not_before
-    not_after = request.not_after
-    status = request.status
-    public_key = request.public_key
-    print(f"Public key {public_key[:10]}...{public_key[-10:]} received from user {user_uid}.")
+# @router.post("/key")
+# async def upload_key(request: RequestUploadPublicKey):    
+#     user_uid = request.state.user['uid']                                    # Access the user UID from Firebase token
+#     certi_url = request.certi_url
+#     issuer_name = request.issuer_name
+#     not_before = request.not_before
+#     not_after = request.not_after
+#     status = request.status
+#     public_key = request.public_key
+#     print(f"Public key {public_key[:10]}...{public_key[-10:]} received from user {user_uid}.")
     
-    try:
-        insert_key_certi(user_uid, certi_url, issuer_name, not_before, not_after, status, public_key)
-        return {"message": "Public key registered successfully."}
+#     try:
+#         insert_key_certi(user_uid, certi_url, issuer_name, not_before, not_after, status, public_key)
+#         return {"message": "Public key registered successfully."}
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 # # the image is not of File type anymore, now it is sent with base64 encoding from the frontend

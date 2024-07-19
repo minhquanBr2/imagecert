@@ -1,29 +1,56 @@
-from db.db_insert import insert_image, insert_hash, insert_verification_status
 from internal.upload.extract_metadata import extract_metadata
 from internal.upload.preprocess import generate_image_name
 import time
 import cv2
 import os
 import config
+import requests
+
 
 def save_image(userUID, originalFilename, filename, temp_filepath, signature):
     metadata = extract_metadata(temp_filepath)
-    # try if timestamp exists, else assign ""
-    # TODO: mapping metadata to db schema
-    timestamp = metadata.get("DateTime", "")
-    caption = metadata.get("ImageDescription", "")
-    location = metadata.get("GPSInfo", "")
-    deviceName = metadata.get("Model", "")
-    imageID = insert_image(userUID, originalFilename, filename, timestamp, caption, location, deviceName, signature)
-    return imageID
+    data = {
+        "user_uid": userUID,
+        "original_filename": originalFilename,
+        "filename": filename,
+        "timestamp": metadata.get("DateTime", ""),
+        "caption": metadata.get("ImageDescription", ""),
+        "location": metadata.get("GPSInfo", ""),
+        "device_name": metadata.get("Model", ""),
+        "signature": signature
+    }
+    url = f"{config.DB_ENDPOINT_URL}/insert/image"
+    response = requests.post(url, data)
+    if response.status_code == 200:
+        return response.json()["message"]["image_id"]
+    return None
 
 
 def save_hash(imageID, hash):
-    insert_hash(imageID, hash["type"], hash["value"])
+    data = {
+        "image_id": imageID,
+        "hash_type": hash["type"],
+        "value": hash["value"]
+    }
+    url = f"{config.DB_ENDPOINT_URL}/insert/hash"
+    response = requests.post(url, data)
+    if response.status_code != 200:
+        print(f"Error saving hash for image {imageID}.")
+        return None
     
 
 def save_verification_status(imageID, result, verificationTimestamp):
-    insert_verification_status(imageID, "", result, verificationTimestamp)
+    data = {
+        "image_id": imageID,
+        "admin_uid": "",
+        "result": result,
+        "verification_timestamp": verificationTimestamp
+    }
+    url = f"{config.DB_ENDPOINT_URL}/insert/verification_status"
+    response = requests.post(url, data)
+    if response.status_code != 200:
+        print(f"Error saving verification status for image {imageID}.")
+        return None
 
 
 def save_uploaded_data_to_db(userUID, originalFilename, filename, temp_filepath, signature, verificationStatus, hash):
