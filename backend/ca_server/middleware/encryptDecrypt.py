@@ -17,7 +17,7 @@ def get_uid_from_authorization_header(authorization: str):
         token = token.split("Bearer ")[-1]
         try:
             decoded_token = auth.verify_id_token(token)
-            print('get_uid_from_authorization_header', decoded_token)
+            # print('get_uid_from_authorization_header', decoded_token)
             return decoded_token.get("uid"), None
         except exceptions.FirebaseError as e:
             if 'Token expired' in str(e):
