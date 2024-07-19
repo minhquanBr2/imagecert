@@ -3,13 +3,27 @@ import IndexedDBServices from '../service/indexDB';
 
 class KeyManager {
 
+  public static downloadFile(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.remove();
+  }
+  
+
   public static pemEncode(buffer: ArrayBuffer, label: string): string {
     const base64 = Buffer.from(buffer).toString('base64');
     const formatted = base64.replace(/(.{64})/g, '$1\n');
     return `-----BEGIN ${label}-----\n${formatted}\n-----END ${label}-----`;
   };
 
-  public static async generateKeyPair(): Promise<{ publicKey: ArrayBuffer; privateKey: ArrayBuffer }> {
+
+  public static async generateKeyPair(userUID: string): Promise<{ publicKey: ArrayBuffer; privateKey: ArrayBuffer }> {
     const keyPair = await window.crypto.subtle.generateKey(
       {
         name: 'RSASSA-PKCS1-v1_5',
@@ -18,7 +32,7 @@ class KeyManager {
         hash: 'SHA-256'
       },
       true,
-      ['sign', 'verify']
+      ['sign']
     );
 
     
@@ -33,11 +47,16 @@ class KeyManager {
     // const publicKeyPem = this.pemEncode(publicKey, 'PUBLIC KEY');
     // const privateKeyPem = this.pemEncode(privateKey, 'PRIVATE KEY');
 
+    const publicKeyBlob = new Blob([publicKey], { type: "application/x-pem-file" });
+    const privateKeyBlob = new Blob([privateKey], { type: "application/x-pem-file" });
+    this.downloadFile(publicKeyBlob, `${userUID}.pub`);
+    this.downloadFile(privateKeyBlob, `${userUID}`);
+
     return { publicKey, privateKey };
   }
   
 
-  public static async importKey(privateKeyArrayBuffer: ArrayBuffer): Promise<{ privateKey: CryptoKey }> {
+  public static async importPrivateKey(privateKeyArrayBuffer: ArrayBuffer): Promise<{ privateKey: CryptoKey }> {
     const privateKey = await window.crypto.subtle.importKey(
       "pkcs8",
       privateKeyArrayBuffer,
@@ -45,10 +64,25 @@ class KeyManager {
         name: "RSASSA-PKCS1-v1_5",
         hash: "SHA-256"
       },
-      false,
-      ["sign", "verify"]
+      true,
+      ["sign"]
     );
     return { privateKey };
+  };
+
+
+  public static async importPublicKey(publicKeyArrayBuffer: ArrayBuffer): Promise<{ publicKey: CryptoKey }> {
+    const publicKey = await window.crypto.subtle.importKey(
+      "spki",
+      publicKeyArrayBuffer,
+      {
+        name: "RSASSA-PKCS1-v1_5",
+        hash: "SHA-256"
+      },
+      true,
+      ["verify"]
+    );
+    return { publicKey };
   };
 
 

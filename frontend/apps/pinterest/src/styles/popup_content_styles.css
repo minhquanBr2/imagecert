@@ -1,23 +1,42 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5); /* Optional: add a semi-transparent background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000; /* Ensure it sits above other content */
+}
+
+
 .modal {
     font-size: 12px;
+    background-color: rgb(249, 200, 189);
+    margin: 80px
   }
   .modal > .header {
     width: 100%;
     border-bottom: 1px solid gray;
-    font-size: 18px;
+    font-size: 20px;
+    font-weight: bold;
     text-align: center;
     padding: 5px;
   }
   .modal > .content {
     width: 100%;
-    padding: 10px 5px;
+    padding: 20px 20px 10px 20px;
+    font-size: 14px;
+
   }
   .modal > .actions {
     margin: auto;
   }
   .modal > .actions {
     width: 100%;
-    padding: 10px 5px;
+    padding: 5px 5px 5px;
     text-align: center;
   }
   .modal > .close {

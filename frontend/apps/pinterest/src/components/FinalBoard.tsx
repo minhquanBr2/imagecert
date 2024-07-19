@@ -54,7 +54,7 @@ const FinalBoard: React.FC = () => {
 
   const handleGenerateNewKeyPair = async () => {
     try {
-      const { publicKey, privateKey } = await KeyManager.generateKeyPair();
+      const { publicKey, privateKey } = await KeyManager.generateKeyPair(userUID as string);
       const privateKeyCryptoObject = await KeyManager.importKey(privateKey);
       await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKeyCryptoObject);
       setShowGenerateKeyPopUp(false);
@@ -64,18 +64,43 @@ const FinalBoard: React.FC = () => {
   };
 
 
-  const handleUploadPrivateKey = async (event: any) => {
-    const file = event.target.files[0];
-    if (file) {
-      try {
-        const privateKey = await file.arrayBuffer();
-        const privateKeyCryptoObject = await KeyManager.importKey(privateKey);
-        await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKeyCryptoObject);
-        // TODO: verify if private key match public key
-        setShowGenerateKeyPopUp(false);
-      } catch (error) {
-        console.error('Error uploading private key:', error);
+  const handleUploadKeyPair = async (event: any) => {
+    const files = event.target.files;
+
+    // Check if the user uploaded exactly 2 files
+    if (files.length !== 2){
+      alert("Please upload exactly 2 files: public key file (*.pub) and private key file (without extension).");
+    }
+
+    // Identify the files by their names
+    let publicKeyFile: File | null = null;
+    let privateKeyFile: File | null = null;
+    for (let i = 0; i < files.length; i++) {
+      if (files[i].name.endswith('.pub')) {
+        publicKeyFile = files[i];
+      } else {
+        privateKeyFile = files[i];
       }
+    }
+
+    // Ensure both public and private key files are identified
+    if (!publicKeyFile || !privateKeyFile) {
+      alert("Please upload a valid public key file (*.pub) and a private key file (without extension).");
+      return;
+    }
+
+    // Process files
+    try {
+      const privateKey = await privateKeyFile.arrayBuffer();
+      const privateKeyCryptoObject = await KeyManager.importPrivateKey(privateKey);
+      await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKeyCryptoObject);
+
+      const publicKey = await publicKeyFile.arrayBuffer();
+      const publicKeyCryptoObject = await KeyManager.importPublicKey(publicKey);
+      // TODO: ZKP challenge to upload public key
+      // if challenge success and public key is valid (i.e. saved with 'active' status in db), store public key in IndexedDB
+    } catch (error) {
+      console.error('Error uploading key pair:', error);
     }
   };
 
@@ -130,7 +155,12 @@ const FinalBoard: React.FC = () => {
   };
 
   return (
-    <div style={{ overflow: 'hidden', height: '100dvh', width: '100dvw' }} ref={animateRef}>
+    <div style={{ overflow: 'hidden', height: '100dvh', width: '100dvw' }} ref={animateRef}>  
+      <div>
+        <Popup open={showGenerateKeyPopUp} closeOnDocumentClick={false}>
+          <PopUpContent close={close} handleGenerateNewKeyPair={handleGenerateNewKeyPair} handleUploadKeyPair={handleUploadKeyPair}/>
+        </Popup>
+      </div>          
       <div className='header_container' id='header_bar'>
         <Header pinsToFilter={pinsFromDb} filterPins={filterPins} />
       </div>
@@ -168,9 +198,6 @@ const FinalBoard: React.FC = () => {
         {showOpenPin ? <OpenPin setShowOpenPin={setShowOpenPin} pinDetails={pinDetails} deletePin={deletePin} /> : null}
       </div>
       {showLoading ? <LoadingIcon /> : null}
-      <Popup position="right center">
-        <PopUpContent/>
-      </Popup>
     </div>
   );
 };

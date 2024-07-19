@@ -32,7 +32,7 @@ def test_hash():
 
 
 def test_verification_status():
-    print("\nTesting verification_status table")
+    print("\nTesting verificationStatus table")
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     query = 'SELECT * FROM verificationStatus'
@@ -46,7 +46,7 @@ def test_verification_status():
 
 
 def test_key_certi():
-    print("\nTesting key_certi table")
+    print("\nTesting keyCerti table")
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     query = 'SELECT * FROM keyCerti'

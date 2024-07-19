@@ -27,7 +27,7 @@ def select_key_certi_from_user_uid(user_uid):
     else:
         return {
             "user_uid": results[0][1],
-            "certi_url": results[0][2],
+            "certi": results[0][2],
             "issuer_name": results[0][3],
             "not_before": results[0][4],
             "not_after": results[0][5],

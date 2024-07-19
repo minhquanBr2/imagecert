@@ -7,3 +7,4 @@ export { default as Pin } from './Pin';
 export { default as TagsCreator } from './TagsCreator';
 export { default as Header } from './Header';
 export { default as LoadingIcon } from './LoadingIcon';
+export { default as PopUpContent } from './PopUpContent';

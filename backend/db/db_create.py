@@ -95,7 +95,7 @@ def create_table_key_certi():
         CREATE TABLE IF NOT EXISTS keyCerti (
             certiID INTEGER PRIMARY KEY AUTOINCREMENT,
             userUID INTEGER NOT NULL,
-            certiURL TEXT NOT NULL,
+            certi TEXT NOT NULL,
             issuerName TEXT NOT NULL,
             notBefore TEXT NOT NULL,
             notAfter TEXT NOT NULL,
