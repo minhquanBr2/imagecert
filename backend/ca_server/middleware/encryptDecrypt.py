@@ -94,7 +94,7 @@ class EncryptMiddleware(BaseHTTPMiddleware):
                         "tag": b64encode(encryptor.tag).decode()
                     }
 
-                    print("Encrypted Response:", encrypted_response)
+                    # print("Encrypted Response:", encrypted_response)
 
                     # Create the new response
                     m_response = Response(

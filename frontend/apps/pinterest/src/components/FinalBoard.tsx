@@ -1,4 +1,5 @@
 import React, { useRef, useState, useContext, useEffect } from 'react';
+import Popup from 'reactjs-popup';
 import { deletePinBackend, fetchPinsBackend } from '../firebase_setup/DatabaseOperations.ts';
 import { Tooltip } from 'antd';
 
@@ -20,28 +21,61 @@ const FinalBoard: React.FC = () => {
   const [showOpenPin, setShowOpenPin] = useState(false);
   const [showGuidelines, setShowGuidelines] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
+  const [showGenerateKeyPopUp, setShowGenerateKeyPopUp] = useState(false);
   const [pinDetails, setPinDetails] = useState<PinDetails | null>(null);
   const { user } = useContext(AuthContext);
   const userUID = user?.uid;
 
   useEffect(() => {
     console.log("User UID: ", userUID);
-    const generateAndStoreKeys = async () => {
+    const checkForExistingPrivateKey = async () => {
       try {
-        const existingPrivateKey = await IndexedDBServices.getItem("userPrivateKeyStore", userUID as string);
-        if (existingPrivateKey) {
+        const existingPrivateKeyCryptoObject = await IndexedDBServices.getItem("userPrivateKeyStore", userUID as string);
+        if (existingPrivateKeyCryptoObject) {
+          setShowGenerateKeyPopUp(false); 
           console.log('Private key found in IndexedDB');
         } else {
-          const { publicKey, privateKey } = await KeyManager.generateKeyPair();     // type: CryptoKey
-          await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKey);
-        }
+          setShowGenerateKeyPopUp(true); 
+        }      
+        // else {
+        //   const { publicKey, privateKey } = await KeyManager.generateKeyPair();     // type: CryptoKey
+        //   await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKey);
+        // }
       } catch (error) {
-        console.error('Error generating or storing keys:', error);
+        console.error('Error checking for existing private key:', error);
       }
     };
+    checkForExistingPrivateKey();
+  }, [userUID]);  
 
-    generateAndStoreKeys();
-  }, [userUID]); // Dependency array includes userUID
+
+  const handleGenerateNewKeyPair = async () => {
+    try {
+      const { publicKey, privateKey } = await KeyManager.generateKeyPair();
+      const privateKeyCryptoObject = await KeyManager.importKey(privateKey);
+      await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKeyCryptoObject);
+      setShowGenerateKeyPopUp(false);
+    } catch (error) {
+      console.error('Error generating or storing new key pair:', error);
+    }
+  };
+
+
+  const handleUploadPrivateKey = async (event: any) => {
+    const file = event.target.files[0];
+    if (file) {
+      try {
+        const privateKey = await file.arrayBuffer();
+        const privateKeyCryptoObject = await KeyManager.importKey(privateKey);
+        await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKeyCryptoObject);
+        // TODO: verify if private key match public key
+        setShowGenerateKeyPopUp(false);
+      } catch (error) {
+        console.error('Error uploading private key:', error);
+      }
+    }
+  };
+
 
   const fetchPins = async () => {
     let pinsArray: any[] = [];
@@ -131,6 +165,9 @@ const FinalBoard: React.FC = () => {
         {showOpenPin ? <OpenPin setShowOpenPin={setShowOpenPin} pinDetails={pinDetails} deletePin={deletePin} /> : null}
       </div>
       {showLoading ? <LoadingIcon /> : null}
+      <Popup trigger={<button> Trigger</button>} position="right center">
+        <div>Popup content here !!</div>
+      </Popup>
     </div>
   );
 };

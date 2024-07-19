@@ -20,7 +20,7 @@ app.add_middleware(
 )
 
 
-# # Set up Firebase Auth middleware
+# Set up Firebase Auth middleware
 initialize_firebase()
 app.add_middleware(FirebaseAuthMiddleware)
 
