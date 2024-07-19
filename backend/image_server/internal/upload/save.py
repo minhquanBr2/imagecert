@@ -6,7 +6,7 @@ import cv2
 import os
 import config
 
-def save_image(userUID, originalFilename, filename, temp_filepath):
+def save_image(userUID, originalFilename, filename, temp_filepath, signature):
     metadata = extract_metadata(temp_filepath)
     # try if timestamp exists, else assign ""
     # TODO: mapping metadata to db schema
@@ -14,7 +14,6 @@ def save_image(userUID, originalFilename, filename, temp_filepath):
     caption = metadata.get("ImageDescription", "")
     location = metadata.get("GPSInfo", "")
     deviceName = metadata.get("Model", "")
-    signature = ""
     imageID = insert_image(userUID, originalFilename, filename, timestamp, caption, location, deviceName, signature)
     return imageID
 
@@ -27,8 +26,8 @@ def save_verification_status(imageID, result, verificationTimestamp):
     insert_verification_status(imageID, "", result, verificationTimestamp)
 
 
-def save_uploaded_data_to_db(userUID, originalFilename, filename, temp_filepath, verificationStatus, hash):
-    imageID = save_image(userUID, originalFilename, filename, temp_filepath)
+def save_uploaded_data_to_db(userUID, originalFilename, filename, temp_filepath, signature, verificationStatus, hash):
+    imageID = save_image(userUID, originalFilename, filename, temp_filepath, signature)
     save_hash(imageID, hash)
     save_verification_status(imageID, verificationStatus, time.time())
 

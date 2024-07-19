@@ -35,6 +35,7 @@ class KeyManager {
 
     return { publicKey, privateKey };
   }
+  
 
   public static async importKey(privateKeyArrayBuffer: ArrayBuffer): Promise<{ privateKey: CryptoKey }> {
     const privateKey = await window.crypto.subtle.importKey(
@@ -49,6 +50,7 @@ class KeyManager {
     );
     return { privateKey };
   };
+
 
   public static async signImage(userUID: string, imageFile: File): Promise<string> {
     const privateKey = await IndexedDBServices.getItem("userPrivateKeyStore", userUID as string);

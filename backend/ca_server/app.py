@@ -8,10 +8,14 @@ from routes import challenge, handshake
 from utils.key import generate_ca_key_pair
 
 firebase_admin.initialize_app(options=firebaseConfig)
+from db.db_insert import insert_key_certi
 
 app = FastAPI()
 
 # Add CORS middleware
+app.add_middleware(FirebaseAuthMiddleware)
+app.add_middleware(EncryptMiddleware)
+app.add_middleware(DecryptMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,9 +23,6 @@ app.add_middleware(
     allow_headers=["*"],
     allow_credentials=True
 )
-app.add_middleware(FirebaseAuthMiddleware)
-app.add_middleware(EncryptMiddleware)
-app.add_middleware(DecryptMiddleware)
 
 generate_ca_key_pair()
 
