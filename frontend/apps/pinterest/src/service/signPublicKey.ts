@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import { AUTH_KEY } from "../type/constant";
 import { arrayBufferToBase64 } from "../utils/bufferToBase64";
 import { Challenge } from "./caChallenge";
@@ -9,11 +10,12 @@ export const getCertForPubkey = async (pubkey: string) => {
   try{
     if (!SSLClient.sessionKey && sessionStorage.getItem('sessionKey')) {
       SSLClient.sessionKey = sessionStorage.getItem('sessionKey');
-    }else if (!SSLClient.sessionKey){
+    }else if (!sessionStorage.getItem('sessionKey')){
       await SSLClient.startHandshake();
     }
 
     if (!sessionStorage.getItem('sessionKey')){
+      toast.error('Session key not found in local storage');
       return;
     }
 
