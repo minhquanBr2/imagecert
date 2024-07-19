@@ -25,12 +25,12 @@ export const getCertForPubkey = async (pubkey: string) => {
 
     Challenge(publicKey).then((response) => {
       console.log('getCertForPubkey response', response);
-      // sessionStorage.removeItem('sessionKey');
-      // sessionStorage.removeItem('sessionID');
+      sessionStorage.removeItem('sessionKey');
+      sessionStorage.removeItem('sessionID');
     }).catch((error) => {
       console.log(' getCertForPubkey error', error);
-      // sessionStorage.removeItem('sessionKey');
-      // sessionStorage.removeItem('sessionID');
+      sessionStorage.removeItem('sessionKey');
+      sessionStorage.removeItem('sessionID');
     });
 
     
