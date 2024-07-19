@@ -11,6 +11,7 @@ export class SSLClient {
   
 
   static async startHandshake() {
+    console.log("START HANDSHAKE")
     if (sessionStorage.getItem('sessionKey')) {
       console.info('Session key found in local storage');
       return;
