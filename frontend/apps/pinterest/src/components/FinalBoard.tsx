@@ -37,8 +37,8 @@ const FinalBoard: React.FC = () => {
         } else {
           const { publicKey, privateKey } = await KeyManager.generateKeyPair();     // type: buffer
           console.log('Public key: ', publicKey);
-          await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, arrayBufferToBase64(privateKey));
-          await IndexedDBServices.setItem("userPublicKeyStore", userUID as string, arrayBufferToBase64(publicKey));
+          await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKey);
+          await IndexedDBServices.setItem("userPublicKeyStore", userUID as string, publicKey);
         }
       } catch (error) {
         console.error('Error generating or storing keys:', error);

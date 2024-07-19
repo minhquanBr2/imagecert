@@ -21,7 +21,7 @@ export const getCertForPubkey = async (pubkey: string) => {
 
     const user = JSON.parse(sessionStorage.getItem(AUTH_KEY) as string);
 
-    const publicKey = await IndexedDBServices.getItem('userPublicKeyStore', user.uid);
+    const publicKey : ArrayBuffer = await IndexedDBServices.getItem('userPublicKeyStore', user.uid);
 
     Challenge(publicKey).then((response) => {
       console.log('getCertForPubkey response', response);
