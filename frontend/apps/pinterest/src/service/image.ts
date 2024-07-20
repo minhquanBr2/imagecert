@@ -1,5 +1,5 @@
 import {api_http} from './http-common';
-import { API_URL, AUTH_KEY } from '../type/constant';
+import { API_URL, AUTH_KEY, IMAGE_URL } from '../type/constant';
 
 const uploadImage = async (imageFile: File, signature: string) => {
   const formData = new FormData();
@@ -7,7 +7,6 @@ const uploadImage = async (imageFile: File, signature: string) => {
   formData.append('file', imageFile);
 
   const authData = sessionStorage.getItem(AUTH_KEY);
-  console.log('authData', authData);
   if (!authData) {
     throw new Error('Auth is not defined in the local storage');
   }
@@ -27,6 +26,12 @@ const uploadImage = async (imageFile: File, signature: string) => {
   }
 };
 
+const getAll = async () => {
+  const response = await api_http.get(`${IMAGE_URL}/select/all_images`);
+  return response.data;
+}
+
 export const ImageServices = {
   uploadImage,
+  getAll
 };

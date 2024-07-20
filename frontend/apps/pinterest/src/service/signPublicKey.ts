@@ -6,7 +6,7 @@ import { SSLClient } from "./handShake";
 import IndexedDBServices from "./indexDB";
 
 
-export const getCertForPubkey = async (pubkey: string) => {
+export const getCertForPubkey = async () => {
   try{
     if (!SSLClient.sessionKey && sessionStorage.getItem('sessionKey')) {
       SSLClient.sessionKey = sessionStorage.getItem('sessionKey');
@@ -16,26 +16,25 @@ export const getCertForPubkey = async (pubkey: string) => {
 
     if (!sessionStorage.getItem('sessionKey')){
       toast.error('Session key not found in local storage');
-      return;
+      return 0;
     }
 
     const user = JSON.parse(sessionStorage.getItem(AUTH_KEY) as string);
 
     const publicKey : ArrayBuffer = await IndexedDBServices.getItem('userPublicKeyStore', user.uid);
 
-    Challenge(publicKey).then((response) => {
-      console.log('getCertForPubkey response', response);
+    const result =  await Challenge(publicKey);
+    if (result){
       sessionStorage.removeItem('sessionKey');
       sessionStorage.removeItem('sessionID');
-    }).catch((error) => {
-      console.log(' getCertForPubkey error', error);
+      return 1;
+    }else{
       sessionStorage.removeItem('sessionKey');
       sessionStorage.removeItem('sessionID');
-    });
-
-    
-
+      return 0;
+    }
   }catch(error){
     console.error('Error getting cert for public key:', error);
+    return 0;
   }
 }

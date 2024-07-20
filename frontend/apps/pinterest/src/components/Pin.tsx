@@ -75,7 +75,8 @@ function Pin(props : any){
   ];
   const [showDropdown, setShowDropdown] = useState(false);
   return (
-    <div className={`card card_${props.pinDetails.pin_size}`}>
+    // <div className={`card card_${props.pinDetails.pin_size}`}>
+    <div className={`card card_medium`}>
       <div className='pin_title'>{props.pinDetails.title}</div>
 
       <div onClick={() => openPin(props.pinDetails, props.openPin)} className='pin_modal'>
@@ -110,7 +111,7 @@ function Pin(props : any){
         </div>
       </div>
       <div className='pin_image'>
-        <img onLoad={checkSize} src={props.pinDetails.img_url} alt='pin_image' />
+        <img onLoad={checkSize} src={props.pinDetails.imageURL} alt='pin_image' />
       </div>
     </div>
   );

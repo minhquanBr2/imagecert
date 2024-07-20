@@ -29,7 +29,6 @@ const App = () => {
     );
   
   const { user } = useContext(AuthContext);
-  console.log('user main', user);
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>

@@ -18,6 +18,8 @@ import "../styles/popup_content_styles.css";
 import { Challenge } from '../service/caChallenge.ts';
 import { getCertForPubkey } from '../service/signPublicKey.ts';
 import { arrayBufferToBase64 } from '../utils/bufferToBase64.ts';
+import { toast } from 'react-toastify';
+import { ImageServices } from '../service/image.ts';
 
 const FinalBoard: React.FC = () => {
   const animateRef = useRef(null);
@@ -30,7 +32,7 @@ const FinalBoard: React.FC = () => {
   const [showGenerateKeyPopUp, setShowGenerateKeyPopUp] = useState(false);
   const [pinDetails, setPinDetails] = useState<PinDetails | null>(null);
   const { user } = useContext(AuthContext);
-  const userUID = user?.uid;
+  const userUID = user?.uid as string;
 
   useEffect(() => {
     console.log("User UID: ", userUID);
@@ -40,11 +42,9 @@ const FinalBoard: React.FC = () => {
         if (existingPrivateKeyCryptoObject) {
           setShowGenerateKeyPopUp(false); 
           console.log('Private key found in IndexedDB');
-        } else {
-          const { publicKey, privateKey } = await KeyManager.generateKeyPair();     // type: buffer
-          console.log('Public key: ', publicKey);
-          await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKey);
-          await IndexedDBServices.setItem("userPublicKeyStore", userUID as string, publicKey);
+        }else {
+          setShowGenerateKeyPopUp(true);
+          console.log('No private key found in IndexedDB');
         }
       } catch (error) {
         console.error('Error checking for existing private key:', error);
@@ -57,9 +57,18 @@ const FinalBoard: React.FC = () => {
   const handleGenerateNewKeyPair = async () => {
     try {
       const { publicKey, privateKey } = await KeyManager.generateKeyPair(userUID as string);
-      const privateKeyCryptoObject = await KeyManager.importPrivateKey(privateKey);
-      await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKeyCryptoObject);
-      setShowGenerateKeyPopUp(false);
+      // const privateKeyCryptoObject = await KeyManager.importPrivateKey(privateKey);
+      await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKey);
+      await IndexedDBServices.setItem("userPublicKeyStore", userUID as string, publicKey);
+      const result = await getCertForPubkey();
+      console.log('Result: ', result);
+      if (result){
+        toast.success("Key pair uploaded successfully!");
+        setShowGenerateKeyPopUp(false);
+      }
+      else
+        toast.error("Key pair upload failed!");
+
     } catch (error) {
       console.error('Error generating or storing new key pair:', error);
     }
@@ -97,12 +106,19 @@ const FinalBoard: React.FC = () => {
     try {
       const privateKey = await privateKeyFile.arrayBuffer();
       const privateKeyCryptoObject = await KeyManager.importPrivateKey(privateKey);
-      // await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKeyCryptoObject);         // only do this after ZKP challenge
+      await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKey);         // only do this after ZKP challenge
 
       const publicKey = await publicKeyFile.arrayBuffer();
       const publicKeyCryptoObject = await KeyManager.importPublicKey(publicKey);
-      // TODO: ZKP challenge to upload public key
-      // if challenge success and public key is valid (i.e. saved with 'active' status in db), store public key in IndexedDB
+      await IndexedDBServices.setItem("userPublicKeyStore", userUID as string, publicKey);
+      const result = await getCertForPubkey();
+      console.log('Result: ', result);
+      if (result){
+        toast.success("Key pair uploaded successfully!");
+        setShowGenerateKeyPopUp(false);
+      }
+      else
+        toast.error("Key pair upload failed!");
     } catch (error) {
       console.error('Error uploading key pair:', error);
     }
@@ -111,12 +127,12 @@ const FinalBoard: React.FC = () => {
 
   const fetchPins = async () => {
     let pinsArray: any[] = [];
-    const firebaseData = await fetchPinsBackend();
+    const firebaseData = await ImageServices.getAll();
     console.log('Firebase data: ', firebaseData);
-    firebaseData.map((pin: any) => {
+    firebaseData.message.map((pin: any) => {
       pinsArray.push(
         <Pin
-          key={pin.imageId}
+          key={pin.imageID}
           pinDetails={pin}
           openPin={openPin}
         />
@@ -160,7 +176,7 @@ const FinalBoard: React.FC = () => {
 
   return (
     <div style={{ overflow: 'hidden', height: '100dvh', width: '100dvw' }} ref={animateRef}>  
-      <button onClick={() => getCertForPubkey("user_public_key")}>Challenge</button>
+      {/* <button onClick={() => getCertForPubkey("user_public_key")}>Challenge</button> */}
       <div>
         <Popup open={showGenerateKeyPopUp} closeOnDocumentClick={false}>
           <PopUpContent close={close} handleGenerateNewKeyPair={handleGenerateNewKeyPair} handleUploadKeyPair={handleUploadKeyPair}/>

@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import { ImageServices } from '../service/image';
 import KeyManager from './KeyManager';
 import { AUTH_KEY } from '../type/constant';
+import { responsiveArray } from 'antd/es/_util/responsiveObserver';
 
 let img_file : File;
 
@@ -55,18 +56,9 @@ async function savePin(
   console.log('Signature:', signature);  
   ImageServices.uploadImage(img_file, signature).then((response) => {
     console.log(response);
-    if (response.status === 200) {
-      //TODO: add save image to BackEnd endpoints
-      // const doc_snap = await savePinBackend(e, pin_metadata, img_file);
-      // if (!doc_snap){
-      //   toast.error('Error saving pin');
-      //   return;
-      // }
-      // console.log(doc_snap);
-      toast.success('Image uploaded successfully');
-      refreshPins();
-      setIsLoading(false);
-    }
+    toast.success(response.message);
+    refreshPins();
+    setIsLoading(false);
   }).catch((error) => {
     console.error('Error uploading image', error);
     toast.error('Error uploading image');

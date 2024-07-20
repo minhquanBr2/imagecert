@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
 import IndexedDBServices from '../service/indexDB';
+import { base64ToArrayBuffer } from '../utils/base64ToArrayBuffer';
 
 class KeyManager {
 
@@ -88,11 +89,16 @@ class KeyManager {
 
 
   public static async signImage(userUID: string, imageFile: File): Promise<string> {
-    const privateKey = await IndexedDBServices.getItem("userPrivateKeyStore", userUID as string);
+    const privateKeyData = await IndexedDBServices.getItem("userPrivateKeyStore", userUID as string);
+    console.log("privateKeyData.privateKey", privateKeyData, privateKeyData instanceof ArrayBuffer);
+    const privateKeyArrayBuffer = privateKeyData instanceof ArrayBuffer 
+      ? privateKeyData 
+      : base64ToArrayBuffer(privateKeyData);
+    const privateKey_CryptoKey = await this.importPrivateKey(privateKeyArrayBuffer);
     const arrayBuffer = await imageFile.arrayBuffer();  
     const signature = await window.crypto.subtle.sign(
       'RSASSA-PKCS1-v1_5',
-      privateKey.privateKey,
+      privateKey_CryptoKey.privateKey,
       arrayBuffer
     );
     return Buffer.from(signature).toString('base64');
