@@ -3,7 +3,7 @@ from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.backends import default_backend
 import os
 import base64
-from ..middleware.encryptDecrypt import session_keys 
+from shared import session_keys
 
 # Generate and store CA's key pair if not already present
 def generate_ca_key_pair():

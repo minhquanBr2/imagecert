@@ -8,6 +8,7 @@ import '../styles/modal_styles.css';
 import { toast } from 'react-toastify';
 import { ImageServices } from '../service/image';
 import KeyManager from './KeyManager';
+import { AUTH_KEY } from '../type/constant';
 
 let img_file : File;
 
@@ -37,7 +38,7 @@ async function savePin(
   userUID: string) {
   setIsLoading(true);
   
-  const user = JSON.parse(localStorage.getItem('auth') as string);
+  const user = JSON.parse(sessionStorage.getItem(AUTH_KEY) as string);
   console.log('pinDetails', pinDetails, user);
   const pin_metadata : PinDetails = {
     ...pinDetails,

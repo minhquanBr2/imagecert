@@ -15,6 +15,9 @@ import AuthContext from '../context/AuthContext';
 import PopUpContent from './PopUpContent';
 import "../styles/popup_content_styles.css";
 
+import { Challenge } from '../service/caChallenge.ts';
+import { getCertForPubkey } from '../service/signPublicKey.ts';
+import { arrayBufferToBase64 } from '../utils/bufferToBase64.ts';
 
 const FinalBoard: React.FC = () => {
   const animateRef = useRef(null);
@@ -38,12 +41,11 @@ const FinalBoard: React.FC = () => {
           setShowGenerateKeyPopUp(false); 
           console.log('Private key found in IndexedDB');
         } else {
-          setShowGenerateKeyPopUp(true); 
-        }      
-        // else {
-        //   const { publicKey, privateKey } = await KeyManager.generateKeyPair();     // type: CryptoKey
-        //   await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKey);
-        // }
+          const { publicKey, privateKey } = await KeyManager.generateKeyPair();     // type: buffer
+          console.log('Public key: ', publicKey);
+          await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKey);
+          await IndexedDBServices.setItem("userPublicKeyStore", userUID as string, publicKey);
+        }
       } catch (error) {
         console.error('Error checking for existing private key:', error);
       }
@@ -158,6 +160,7 @@ const FinalBoard: React.FC = () => {
 
   return (
     <div style={{ overflow: 'hidden', height: '100dvh', width: '100dvw' }} ref={animateRef}>  
+      <button onClick={() => getCertForPubkey("user_public_key")}>Challenge</button>
       <div>
         <Popup open={showGenerateKeyPopUp} closeOnDocumentClick={false}>
           <PopUpContent close={close} handleGenerateNewKeyPair={handleGenerateNewKeyPair} handleUploadKeyPair={handleUploadKeyPair}/>

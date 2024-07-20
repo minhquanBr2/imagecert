@@ -29,6 +29,7 @@ export class AuthProvider extends Component<Props, State> {
 	}
 
 	logIn = (user: AuthT) => {
+    console.log('user: ', user)
 		this.setState({
 			user: user,
 		})
@@ -53,7 +54,6 @@ export class AuthProvider extends Component<Props, State> {
 	render() {
 		const { user } = this.state
 		const { logOut, logIn } = this
-		console.log('user: ', user)
 		return (
 			<AuthContext.Provider
 				value={{ user, logIn, logOut }}>

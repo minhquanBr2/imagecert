@@ -6,7 +6,7 @@ export const logOutUser = () => {
   signOut(auth)
     .then(() => {
       console.log('User logged out due to 401 response');
-      localStorage.removeItem(AUTH_KEY);
+      sessionStorage.removeItem(AUTH_KEY);
       window.location.reload(); // Optionally, reload the app to reset state
     })
     .catch((logoutError) => {
