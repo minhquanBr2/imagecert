@@ -9,7 +9,7 @@ import requests
 
 async def save_image(userUID, originalFilename, filename, temp_filepath, signature, ref_filepath):
     metadata = extract_metadata(temp_filepath)
-    data = {
+    payload = {
         "user_uid": userUID,
         "original_filename": originalFilename,
         "filename": filename,
@@ -21,7 +21,7 @@ async def save_image(userUID, originalFilename, filename, temp_filepath, signatu
         "ref_filepath": ref_filepath
     }
     url = f"{config.DB_ENDPOINT_URL}/insert/image"
-    response = requests.post(url, json = data)
+    response = requests.post(url, json = payload)
     if response.status_code == 200:
         print(f"Image {originalFilename} saved to db with new file name as {filename}.")
         return int(response.json()["message"]["image_id"])
@@ -29,13 +29,13 @@ async def save_image(userUID, originalFilename, filename, temp_filepath, signatu
 
 
 async def save_hash(imageID, hash):
-    data = {
+    payload = {
         "image_id": imageID,
         "hash_type": hash["type"],
         "value": hash["value"]
     }
     url = f"{config.DB_ENDPOINT_URL}/insert/hash"
-    response = requests.post(url, json = data)
+    response = requests.post(url, json = payload)
     if response.status_code != 200:
         print(f"Error saving hash for image with ID {imageID}.")
     else:
@@ -43,14 +43,14 @@ async def save_hash(imageID, hash):
     
 
 async def save_verification_status(imageID, result, verificationTimestamp):
-    data = {
+    payload = {
         "image_id": imageID,
         "admin_uid": "",
         "result": result,
         "verification_timestamp": verificationTimestamp
     }
     url = f"{config.DB_ENDPOINT_URL}/insert/verification_status"
-    response = requests.post(url, json = data)
+    response = requests.post(url, json = payload)
     if response.status_code != 200:
         print(f"Error saving verification status for image with ID {imageID}.")
     else:

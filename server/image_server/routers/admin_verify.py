@@ -24,7 +24,7 @@ async def get_verification_history(admin_uid: str):
 
 @router.post("/verify")
 async def verify_image(request: RequestVerifyImage):
-    print(request)
+    print(f"Request from admin: {request}")
     try:
         image_id = request.image_id
         admin_uid = request.admin_uid

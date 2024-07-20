@@ -47,18 +47,6 @@ api_http.interceptors.request.use(
   error => Promise.reject(error)
 );
 
-api_http.interceptors.response.use(
-  response => response,
-  error => {
-    console.error('API Error:', error, error.response.status, error.response.data.message);
-    if (error.response.status === 401 && error.response.data.message.includes('expired')) {
-      console.error('Token expired');
-      logOutUser();
-    }
-    return Promise.reject(error);
-  }
-);
-
 ca_http.interceptors.request.use(
   async (config) => {
     let sessionKey = sessionStorage.getItem('sessionKey');

@@ -16,19 +16,20 @@ def get_original_filename(image_id):
     return results[0][0]
 
 
-def verify_image(image_id, admin_uid, result):
+def verify_image(image_id: int, admin_uid: str, result: int):
     original_filename = get_original_filename(image_id)
     if original_filename == None:
-        return {"message": f"Image {image_id} not found."}
+        return {"message": f"Image {image_id} not found."}    
     
-    data = {
+    url = f"{config.DB_ENDPOINT_URL}/insert/verification_status"   
+    payload = {
         "image_id": image_id,
         "admin_uid": admin_uid,
         "result": result,
-        "verification_timestamp": datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
-    }
-    url = f"{config.DB_ENDPOINT_URL}/insert/verification_status"
-    response = requests.post(url, data)
+        "verification_timestamp": str(datetime.datetime.now().strftime('%Y%m%d%H%M%S%f'))
+    } 
+
+    response = requests.post(url, json = payload)
     if response.status_code != 200:
         return {"message": f"Error saving verification status for image {image_id}."}    
 

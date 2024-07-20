@@ -14,6 +14,7 @@ exclude_paths = [
 
 class FirebaseAuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        print()
         # Allow OPTIONS requests to pass through
         if request.method == "OPTIONS":
             return await call_next(request)

@@ -52,7 +52,13 @@ def select_verification_history(admin_uid):
 def select_pending_images():
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
-    query = 'SELECT image.imageID, image.filename FROM image JOIN verificationStatus ON image.imageID = verificationStatus.imageID WHERE verificationStatus.result = 1'
+    query = '''
+            SELECT image.imageID, image.filename 
+            FROM image 
+            JOIN verificationStatus ON image.imageID = verificationStatus.imageID 
+            GROUP BY image.imageID
+            HAVING COUNT(*) = SUM(verificationStatus.result)
+            '''
     cursor.execute(query)
     image_filenames = cursor.fetchall()
     conn.commit()
@@ -64,6 +70,8 @@ def select_pending_images():
             "imageID": filename[0],
             "filename": os.path.join(config.IMAGE_DISPLAY_URL, f"{filename[1]}.webp")
         })
+
+    # print("Results:", results)
     return results
 
 
