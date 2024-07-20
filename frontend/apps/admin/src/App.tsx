@@ -1,15 +1,41 @@
+import { createTheme, ThemeProvider } from "@mui/material";
+import AdminApp from "./components/pages/Admin";
+import React, { useContext } from "react";
+import AuthContext, { AuthProvider } from "./context/AuthContext";
+import LoginScreen from "./components/pages/Login";
 
-
+export const ColorModeContext = React.createContext({ toggleColorMode: () => {} });
+import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
+    const [mode, setMode] = React.useState<'light' | 'dark'>('light');
+    const colorMode = React.useMemo(
+      () => ({
+        toggleColorMode: () => {
+          setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
+        },
+      }),
+      [],
+    );
   
+    const theme = React.useMemo(
+      () =>
+        createTheme({
+          palette: {
+            mode,
+          },
+        }),
+      [mode],
+    );
   
+  const { user } = useContext(AuthContext);
+  console.log('user main', user);
   return (
-    <div className="content">
-      <h1>Rsbuild with React</h1>
-      <p>Start building amazing things with Rsbuild.</p>
-
-    </div>
+    <ColorModeContext.Provider value={colorMode}>
+      <ThemeProvider theme={theme}>
+          {user ? <AdminApp /> : <LoginScreen />}
+      </ThemeProvider>
+    </ColorModeContext.Provider>
   );
 };
 
