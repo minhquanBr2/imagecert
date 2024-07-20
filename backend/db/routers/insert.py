@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from schemas.request_schemas import RequestUploadImage, RequestUploadHash, RequestUploadVerificationStatus, RequestUploadPublicKeyCerti
-from db import db_insert
+import db_insert
 
 
 router = APIRouter(
@@ -19,10 +19,12 @@ async def insert_image(request: RequestUploadImage):
     location = request.location
     device_name = request.device_name
     signature = request.signature
+    ref_filepath = request.ref_filepath
     print(f"File {original_filename} received from user {user_uid}.")
     
     try:
-        image_id = db_insert.insert_image(user_uid, original_filename, filename, timestamp, caption, location, device_name, signature)
+        image_id = db_insert.insert_image(user_uid, original_filename, filename, timestamp, caption, location, device_name, signature, ref_filepath)
+        print("image id: ", image_id)
         return {"message": {
             "image_id": image_id
         }}

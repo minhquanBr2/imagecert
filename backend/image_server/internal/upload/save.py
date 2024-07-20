@@ -7,7 +7,7 @@ import config
 import requests
 
 
-async def save_image(userUID, originalFilename, filename, temp_filepath, signature):
+async def save_image(userUID, originalFilename, filename, temp_filepath, signature, ref_filepath):
     metadata = extract_metadata(temp_filepath)
     data = {
         "user_uid": userUID,
@@ -17,7 +17,8 @@ async def save_image(userUID, originalFilename, filename, temp_filepath, signatu
         "caption": metadata.get("ImageDescription", ""),
         "location": metadata.get("GPSInfo", ""),
         "device_name": metadata.get("Model", ""),
-        "signature": signature
+        "signature": signature,
+        "ref_filepath": ref_filepath
     }
     url = f"{config.DB_ENDPOINT_URL}/insert/image"
     response = requests.post(url, json = data)
@@ -56,8 +57,8 @@ async def save_verification_status(imageID, result, verificationTimestamp):
         print(f"Verification status saved for image with ID {imageID}.")
 
 
-async def save_uploaded_data_to_db(userUID, originalFilename, filename, temp_filepath, signature, verificationStatus, hash):
-    imageID = await save_image(userUID, originalFilename, filename, temp_filepath, signature)
+async def save_uploaded_data_to_db(userUID, originalFilename, filename, temp_filepath, signature, verificationStatus, hash, ref_filepath):
+    imageID = await save_image(userUID, originalFilename, filename, temp_filepath, signature, ref_filepath)
     await save_hash(imageID, hash)
     await save_verification_status(imageID, verificationStatus, datetime.datetime.now().strftime('%Y:%m:%d %H:%M:%S.%f'))
 

@@ -10,9 +10,10 @@ const uploadImage = async (imageFile: File, signature: string) => {
   if (!authData) {
     throw new Error('Auth is not defined in the local storage');
   }
-  console.log('formData', api_http, formData);
 
   try {
+    console.log('api_http', api_http);
+    console.log('formData', formData);
     const response = await api_http.post(`${API_URL}/upload/image`, formData,{
       headers: {
         'Content-Type': 'multipart/form-data',

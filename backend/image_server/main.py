@@ -1,9 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from routers import upload, admin_verify
-from middlewares.firebase_auth import FirebaseAuthMiddleware
-from internal.firebase_init import initialize_firebase
+from middlewares.firebase.firebase_middleware import FirebaseAuthMiddleware
 
 
 app = FastAPI()
@@ -18,10 +17,6 @@ app.add_middleware(
     allow_methods=["*"],  # Allow all methods (GET, POST, PUT, DELETE, etc.)
     allow_headers=["*"],  # Allow all headers
 )
-
-
-# Set up Firebase Auth middleware
-initialize_firebase()
 app.add_middleware(FirebaseAuthMiddleware)
 
 

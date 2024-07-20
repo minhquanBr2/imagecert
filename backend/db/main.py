@@ -1,7 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from middlewares.firebase_auth import FirebaseAuthMiddleware
-from middlewares.firebase_init import initialize_firebase
 from routers import insert, select
 
 
@@ -16,11 +14,6 @@ app.add_middleware(
     allow_methods=["*"],  # Allow all methods (GET, POST, PUT, DELETE, etc.)
     allow_headers=["*"],  # Allow all headers
 )
-
-
-# # Set up Firebase Auth middleware
-# initialize_firebase()
-# app.add_middleware(FirebaseAuthMiddleware)
 
 
 # Add routers

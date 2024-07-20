@@ -10,6 +10,7 @@ class RequestUploadImage(BaseModel):
     location: str
     device_name: str
     signature: str
+    ref_filepath: str
 
     class Config:
         json_schema_extra = {
@@ -21,7 +22,8 @@ class RequestUploadImage(BaseModel):
                 "caption": "A beautiful image",
                 "location": "Earth",
                 "device_name": "iPhone",
-                "signature": "abcxyz"
+                "signature": "abcxyz",
+                "ref_filepath": "http://104.154.115.168:8001/image/29d5076702c4444e671797f3e95160c874f72f539f14fb88ac73a5a3eeb80a37.webp"
             }
         }
 

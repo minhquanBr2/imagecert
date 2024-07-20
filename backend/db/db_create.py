@@ -30,7 +30,8 @@ def create_table_image():
             caption TEXT,
             location TEXT,
             deviceName TEXT,
-            signature TEXT NOT NULL
+            signature TEXT NOT NULL,
+            ref_filepath TEXT
         );
     ''')
     conn.commit()
@@ -59,7 +60,7 @@ def create_table_verification_status():
         CREATE TABLE IF NOT EXISTS verificationStatus (
             statusID INTEGER PRIMARY KEY AUTOINCREMENT,
             imageID TEXT NOT NULL,
-            adminUID INTEGER NOT NULL,
+            adminUID TEXT NOT NULL,
             result INTEGER NOT NULL,
             verificationTimestamp TEXT NOT NULL
         );
@@ -109,8 +110,8 @@ def create_table_key_certi():
 
 if __name__ == "__main__":
     # create_table_user()
-    # create_table_image()
+    create_table_image()
     # create_table_hash()
     # create_table_verification_status()
     # create_table_image_certi()
-    create_table_key_certi()
+    # create_table_key_certi()
