@@ -39,7 +39,7 @@ class DecryptMiddleware(BaseHTTPMiddleware):
                     print('DecryptMiddleware', uid, error)
                     return JSONResponse(content={"message": error}, status_code=401)
                 session_key = None
-                if session_keys and session_keys[uid]:
+                if session_keys and uid in session_keys:
                     session_key = session_keys[uid]["session_key"]
                 if session_key and "iv" in data and "payload" in data and "tag" in data:
                     print('DecryptMiddleware', uid, session_key, session_keys)  
