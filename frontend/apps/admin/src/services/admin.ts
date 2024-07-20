@@ -36,11 +36,12 @@ export const getPendingImages = async () => {
   return response.data;
 };
 
-export const verifyImage = async (admin_uid: string, image_id: string, result: number) => {
+export const verifyImage = async (image_id: number, admin_uid: string, result: number) => {
   const payload = {
-    admin_uid,
     image_id,
+    admin_uid,
     result,
   };
+  console.log(payload);
   await admin_http.post(`${API_BASE_URL}/verify`, payload);
 };

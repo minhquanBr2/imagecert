@@ -6,7 +6,7 @@ import AuthContext from '../../context/AuthContext';
 
 interface Image {
   filename: string;
-  imageID: string;
+  imageID: number;
   references: any[];
 }
 
@@ -14,8 +14,8 @@ const PendingTab: React.FC = () => {
   const [pendingImages, setPendingImages] = useState<Image[]>([
     {
       filename: "",
-      imageID: "",
-      references: [{filename:"", imageID:""}]
+      imageID: 0,
+      references: [{filename: "", imageID: 0}]
     }
   ]);
 
@@ -34,7 +34,7 @@ const PendingTab: React.FC = () => {
   const handleVerify = async (result: number) => {
     if (!pendingImages[0]) return;
 
-    await verifyImage(user?.uid ?? "",  pendingImages[0].imageID, result);
+    await verifyImage(pendingImages[0].imageID, user?.uid ?? "", result);
     fetchPendingImages();
   };
 

@@ -34,5 +34,5 @@ def drop_table_image():
 
 if __name__ == "__main__":
     # drop_table_key_certi()
-    # drop_table_verification_status()
-    drop_table_image()
+    drop_table_verification_status()
+    # drop_table_image()

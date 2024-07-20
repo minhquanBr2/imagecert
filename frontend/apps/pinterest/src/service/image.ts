@@ -7,6 +7,7 @@ const uploadImage = async (imageFile: File, signature: string) => {
   formData.append('file', imageFile);
 
   const authData = sessionStorage.getItem(AUTH_KEY);
+  console.log('authData', authData);
   if (!authData) {
     throw new Error('Auth is not defined in the local storage');
   }

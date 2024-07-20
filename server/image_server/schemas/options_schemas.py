@@ -1,5 +1,5 @@
 from enum import Enum
 
-class AdminVerificationResultOptions(str, Enum):
-    option1 = 0
-    option2 = 2
+class AdminVerificationResultOptions(int, Enum):
+    option1 = 1
+    option2 = 0

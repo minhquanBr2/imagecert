@@ -25,7 +25,7 @@ def verify_image(image_id, admin_uid, result):
         "image_id": image_id,
         "admin_uid": admin_uid,
         "result": result,
-        "verification_timestamp": datetime.datetime().now().isoformat()
+        "verification_timestamp": datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
     }
     url = f"{config.DB_ENDPOINT_URL}/insert/verification_status"
     response = requests.post(url, data)
