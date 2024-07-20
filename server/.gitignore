@@ -1,5 +1,7 @@
 __pycache__
+*.pyc
+
+# secrets
 data
 credential
 config.py
-db/credential
