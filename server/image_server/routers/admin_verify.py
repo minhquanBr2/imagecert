@@ -16,6 +16,12 @@ async def get_pending_images():
     return results
 
 
+@router.get("/get_all")
+async def get_all_images():
+    results = await display.get_all_images()
+    return results
+
+
 @router.get("/verification_history/{admin_uid}")
 async def get_verification_history(admin_uid: str):
     results = await display.get_verification_history(admin_uid)

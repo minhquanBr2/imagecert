@@ -9,7 +9,7 @@ app = FastAPI()
 app.mount("/image", StaticFiles(directory="../data/images/perm"), name="images")            # Mount the images directory to serve static files
 
 
-# Set up CORS middleware
+app.add_middleware(FirebaseAuthMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allow specific origins
@@ -17,7 +17,6 @@ app.add_middleware(
     allow_methods=["*"],  # Allow all methods (GET, POST, PUT, DELETE, etc.)
     allow_headers=["*"],  # Allow all headers
 )
-app.add_middleware(FirebaseAuthMiddleware)
 
 
 # Add routers

@@ -19,19 +19,19 @@ async def upload_image(request: Request, signature: str = Form(...), file: Uploa
     
     try:         
         original_filename, filename, temp_filepath = save_temp_image(file)
-        verification_status, hash_object, ref_filepath = self_verify_image(temp_filepath)
+        verification_status, hash_object, ref_image_ids = self_verify_image(temp_filepath)
         print(f"Verification status: {verification_status}.")
 
         if verification_status == config.VERIFICATION_STATUS["ACCEPTED"]:
             perm_filepath = save_webp_image(temp_filepath)
-            await save_uploaded_data_to_db(user_uid, original_filename, filename, temp_filepath, signature, verification_status, hash_object, ref_filepath)
+            await save_uploaded_data_to_db(user_uid, original_filename, filename, temp_filepath, signature, verification_status, hash_object, ref_image_ids)
             return {"message": f"Image {original_filename} registered successfully."}
         elif verification_status == config.VERIFICATION_STATUS["PENDING"]:
             perm_filepath = save_webp_image(temp_filepath)
-            await save_uploaded_data_to_db(user_uid, original_filename, filename, perm_filepath, signature, verification_status, hash_object, ref_filepath)
+            await save_uploaded_data_to_db(user_uid, original_filename, filename, perm_filepath, signature, verification_status, hash_object, ref_image_ids)
             return {"message": f"Image {original_filename} is under consideration."}
         else:
-            return {"message": f"Image {original_filename} is rejected. A reference image can be found at {ref_filepath}."}
+            return {"message": f"Image {original_filename} is rejected."}
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")

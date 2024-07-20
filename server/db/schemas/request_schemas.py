@@ -83,23 +83,14 @@ class RequestUploadPublicKeyCerti(BaseModel):
         }
 
 
-class RequestRetrievePublicKeyCerti(BaseModel):
-    user_uid: str
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "user_uid": "123456"
-            }
-        }
-
-
-class RequestRetrieveImage(BaseModel):
+class RequestUploadRef(BaseModel):
     image_id: int
+    ref_image_id: int
 
     class Config:
         json_schema_extra = {
             "example": {
-                "image_id": 1
+                "image_id": 1,
+                "ref_image_id": 2
             }
         }

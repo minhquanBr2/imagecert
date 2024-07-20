@@ -41,7 +41,7 @@ const FinalBoard: React.FC = () => {
           setShowGenerateKeyPopUp(false); 
           console.log('Private key found in IndexedDB');
         } else {
-          const { publicKey, privateKey } = await KeyManager.generateKeyPair();     // type: buffer
+          const { publicKey, privateKey } = await KeyManager.generateKeyPair(userUID as string);     // type: buffer
           console.log('Public key: ', publicKey);
           await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKey);
           await IndexedDBServices.setItem("userPublicKeyStore", userUID as string, publicKey);
