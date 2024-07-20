@@ -5,17 +5,17 @@ import { getPendingImages, verifyImage } from '../../services/admin';
 import AuthContext from '../../context/AuthContext';
 
 interface Image {
-  filename: string;
+  imageURL: string;
   imageID: number;
-  references: any[];
+  refFilepaths: string[];
 }
 
 const PendingTab: React.FC = () => {
   const [pendingImages, setPendingImages] = useState<Image[]>([
     {
-      filename: "",
+      imageURL: "",
       imageID: 0,
-      references: [{filename: "", imageID: 0}]
+      refFilepaths: []
     }
   ]);
 
@@ -39,21 +39,21 @@ const PendingTab: React.FC = () => {
   };
 
   const renderRow = ({ index, key, style }: any) => {
-    if (!pendingImages || !pendingImages[0] || !pendingImages[0].references) return null;
-    const image = pendingImages[0].references[index];
+    if (!pendingImages || !pendingImages[0] || !pendingImages[0].refFilepaths) return null;
+    const image = pendingImages[0].refFilepaths[index];
     return (
       <div key={key} style={style}>
-        <img src={image.filename} alt={`Pending ${index}`} width="50" height="50" />
+        <img src={image} alt={`Pending ${index}`} height="300px"/>
       </div>
     );
   };
 
   return (
     <Box display="flex" p={2}>
-      <Box flexGrow={1}>
+      <Box flexGrow={1} >
         {pendingImages[0] && (
-          <Paper elevation={3} style={{ padding: 16 }}>
-            <img src={pendingImages[0].filename} alt="Current" width="300" height="300" />
+          <Paper elevation={5} style={{ padding: 16, display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <img src={pendingImages[0].imageURL} alt="Current" width="300" height="300" />
             <Box mt={2}>
               <Button
                 variant="contained"
@@ -70,13 +70,13 @@ const PendingTab: React.FC = () => {
           </Paper>
         )}
       </Box>
-      <Box width="300px" height="500px" ml={2}>
+      <Box flexGrow={2} width="300px" height="500px" ml={2}>
         <AutoSizer>
           {({ height, width }) => (
             <List
               height={height}
-              rowCount={(pendingImages && pendingImages[0].references ? pendingImages[0].references.length : 1)}
-              rowHeight={60}
+              rowCount={(pendingImages && pendingImages[0].refFilepaths ? pendingImages[0].refFilepaths.length : 1)}
+              rowHeight={300}
               rowRenderer={renderRow}
               width={width}
             />

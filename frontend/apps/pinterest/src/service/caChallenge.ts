@@ -16,15 +16,13 @@ export const Challenge = async (user_public_key : ArrayBuffer) => {
     user_public_key: pubkeyBase64,
     user_id: user.uid
   }
-  const response = await ca_http.post('/zkp/challenge', payload);
-  console.log('response', response);
 
   try {
     const response = await ca_http.post('/zkp/challenge', payload);
     if (response.status !== 200) {
       throw new Error(`Server responded with status: ${response.status}`);
     }
-    console.log('challenge', response.data.challenge);
+    // console.log('challenge', response.data.challenge);
     const encryptedChallenge = base64ToArrayBuffer(response.data.challenge);
     const privateKeyArrayBuffer = await IndexedDBServices.getItem('userPrivateKeyStore', user.uid);
     const privateKey = await window.crypto.subtle.importKey(
@@ -49,8 +47,8 @@ export const Challenge = async (user_public_key : ArrayBuffer) => {
     const decryptedChallengeUint8 = new Uint8Array(decryptedChallenge);
     // Convert Uint8Array to base64
     const decryptedChallengeBase64 = btoa(String.fromCharCode(...decryptedChallengeUint8));
-    console.log('pubkeyBase64', pubkeyBase64);
-    console.log('decryptedChallenge', decryptedChallengeBase64);
+    // console.log('pubkeyBase64', pubkeyBase64);
+    // console.log('decryptedChallenge', decryptedChallengeBase64);
     
     const response2 = await ca_http.post('/zkp/verify', { 
       challenge_response: decryptedChallengeBase64,
@@ -58,7 +56,7 @@ export const Challenge = async (user_public_key : ArrayBuffer) => {
       user_public_key: pubkeyBase64
     });
 
-    console.log('response2', response2);
+    // console.log('response2', response2);
     if (response2.status !== 200) {
       throw new Error(`Server responded with status: ${response2.status}`);
     }

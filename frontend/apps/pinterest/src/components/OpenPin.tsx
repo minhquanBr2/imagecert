@@ -81,13 +81,13 @@ const OpenPin: React.FC<any> = (props) => {
   return (
     <div className='open_pin_modal'>
       <div className='open_pin_container' ref={modalRef}>
-        {showLargeImg ? <EnlargeImg src={props.pinDetails.img_url} showLargeImg={showLargeImg} setShowLargeImg={setShowLargeImg} /> : null}
+        {showLargeImg ? <EnlargeImg src={props.pinDetails.imageURL} showLargeImg={showLargeImg} setShowLargeImg={setShowLargeImg} /> : null}
         <div className='side' id='left_side_open'>
           <div className='open_section'>
             <div className='open_modals_pin'>
               <Tooltip title='Click to enlarge image' placement='bottom'>
                 <div className='open_pin_image' onClick={() => setShowLargeImg(!showLargeImg)}>
-                  {showLargeImg ? null : <img onLoad={checkSize} src={props.pinDetails.img_url} alt='pin_image' />}
+                  {showLargeImg ? null : <img onLoad={checkSize} src={props.pinDetails.imageURL} alt='pin_image' />}
                 </div>
               </Tooltip>
             </div>
@@ -109,7 +109,7 @@ const OpenPin: React.FC<any> = (props) => {
           <div className='open_section'>
             <div className='open_pin_title'>{props.pinDetails.title}</div>
             <div className='new_pin_input'>{props.pinDetails.description}</div>
-            <TagsCreator tags={props.pinDetails.tags} editable={isEditable} />
+            {/* <TagsCreator tags={props.pinDetails.tags} editable={isEditable} /> */}
           </div>
         </div>
       </div>
