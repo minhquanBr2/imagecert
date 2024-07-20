@@ -142,8 +142,8 @@ async def verify_endpoint(request: Request):
         "issuer_name": issuer_string,
         "not_before": not_before_timestamp,
         "not_after": not_after_timestamp,
-        "status": "1",
-        "certi_url": cert_base64,
+        "status": 1,
+        "certi": cert_base64,
         "public_key": user_public_key_pem
     }
 

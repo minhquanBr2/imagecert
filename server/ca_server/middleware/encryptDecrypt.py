@@ -17,7 +17,7 @@ def get_uid_from_authorization_header(authorization: str):
         token = token.split("Bearer ")[-1]
         try:
             decoded_token = auth.verify_id_token(token)
-            print('get_uid_from_authorization_header', decoded_token)
+            # print('get_uid_from_authorization_header', decoded_token)
             return decoded_token.get("uid"), None
         except exceptions.FirebaseError as e:
             if 'Token expired' in str(e):
@@ -39,7 +39,7 @@ class DecryptMiddleware(BaseHTTPMiddleware):
                     print('DecryptMiddleware', uid, error)
                     return JSONResponse(content={"message": error}, status_code=401)
                 session_key = None
-                if session_keys and session_keys[uid]:
+                if session_keys and uid in session_keys:
                     session_key = session_keys[uid]["session_key"]
                 if session_key and "iv" in data and "payload" in data and "tag" in data:
                     print('DecryptMiddleware', uid, session_key, session_keys)  
