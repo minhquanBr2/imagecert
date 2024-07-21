@@ -40,3 +40,9 @@ async def verify_image(request: RequestVerifyImage):
         return {"message": "Image verification status updated successfully."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+# @router.get("/image/{image_id}/user_uid")
+# async def get_user_uid_from_image_id(image_id: int):
+#     results = await display.get_user_uid_from_image_id(image_id)
+#     return results

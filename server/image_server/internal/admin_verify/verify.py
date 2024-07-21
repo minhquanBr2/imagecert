@@ -7,7 +7,8 @@ from internal.email_send.sendEmail import send_email_with_template
 from internal.email_send.constant import pass_template, fail_template, subject, sender_email, sender_password
 from internal.utils.getEmailFromUid import get_user_email_by_uid
 
-def get_original_filename(image_id):
+
+def get_original_filename(image_id: str):
     url = f"{config.DB_ENDPOINT_URL}/select/image/original/{image_id}"
     response = requests.get(url)
     if response.status_code != 200:
@@ -38,6 +39,8 @@ def verify_image(image_id: int, admin_uid: str, result: int):
         return {"message": f"Error saving verification status for image {image_id}."}    
 
     user_uid = get_user_uid_from_image_id(image_id)
+    if user_uid == None:
+        return {"message": f"User UID not found for image {image_id}."}    
 
     if result == config.VERIFICATION_STATUS["ACCEPTED"]:
         # SEND EMAIL PASS HERE

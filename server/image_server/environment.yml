@@ -14,6 +14,7 @@ dependencies:
   - decorator=5.1.1=pyhd3eb1b0_0
   - exceptiongroup=1.2.0=py310h06a4308_0
   - executing=0.8.3=pyhd3eb1b0_0
+  - gmp=6.2.1=h295c915_3
   - h11=0.14.0=py310h06a4308_0
   - ipykernel=6.28.0=py310h06a4308_0
   - ipython=8.25.0=py310h06a4308_0
@@ -41,7 +42,7 @@ dependencies:
   - psutil=5.9.0=py310h5eee18b_0
   - ptyprocess=0.7.0=pyhd3eb1b0_2
   - pure_eval=0.2.2=pyhd3eb1b0_0
-  - pycrypto=2.6.1=py310h7f8727e_10
+  - pycryptodome=3.15.0=py310h276157c_0
   - pygments=2.15.1=py310h06a4308_1
   - python=3.10.14=h955ad1f_1
   - python-dateutil=2.9.0post0=py310h06a4308_2
