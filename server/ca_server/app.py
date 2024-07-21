@@ -2,13 +2,12 @@ from fastapi import FastAPI
 from middleware.verifyToken import FirebaseAuthMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
-from middleware.firebase_config import firebaseConfig
+from middleware.firebaseConfig import firebaseConfig
 from middleware.encryptDecrypt import EncryptMiddleware, DecryptMiddleware
 from routes import challenge, handshake
 from utils.key import generate_ca_key_pair
 
 firebase_admin.initialize_app(options=firebaseConfig)
-from db.db_insert import insert_key_certi
 
 app = FastAPI()
 
