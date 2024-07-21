@@ -59,8 +59,23 @@ def test_key_certi():
     print()
 
 
+def test_ref():
+    print("\nTesting ref table")
+    conn = sqlite3.connect(config.IMAGEDB_PATH)
+    cursor = conn.cursor()
+    query = 'SELECT * FROM ref'
+    cursor.execute(query)
+    # print the result
+    for row in cursor.fetchall():
+        print(row)
+    conn.commit()
+    conn.close()
+    print()
+
+
 if __name__ == "__main__":
-    test_image()   
+    # test_image()   
     # test_hash()
-    test_verification_status()
+    # test_verification_status()
     # test_key_certi()
+    test_ref()

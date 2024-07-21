@@ -1,4 +1,4 @@
 ca_private_key.pem
 ca_public_key.pem
 middleware/imageca-6c45f-firebase-adminsdk-c5nuc-c8a9b39828.json
-middleware/firebase_config.py
+middleware/firebaseConfig.py

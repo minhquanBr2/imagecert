@@ -62,4 +62,19 @@ async def select_pending_images():
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.get("/all_images")
+async def select_all_images():
+    print("Retrieving all images...")
+    
+    try:
+        results = db_select.select_all_images()
+        if results == None or results == []:
+            return {"message": "No images found."}
+        return {"message": results}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
     

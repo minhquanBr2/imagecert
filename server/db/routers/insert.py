@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from schemas.request_schemas import RequestUploadImage, RequestUploadHash, RequestUploadVerificationStatus, RequestUploadPublicKeyCerti
+from schemas.request_schemas import RequestUploadImage, RequestUploadHash, RequestUploadVerificationStatus, RequestUploadPublicKeyCerti, RequestUploadRef
 import db_insert
 
 
@@ -78,6 +78,20 @@ async def insert_key_certi(request: RequestUploadPublicKeyCerti):
     try:
         db_insert.insert_key_certi(user_uid, certi, issuer_name, not_before, not_after, status, public_key)
         return {"message": "Public key registered successfully."}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.post("/ref")
+async def insert_ref(request: RequestUploadRef):
+    image_id = request.image_id
+    ref_image_id = request.ref_image_id
+    print(f"Reference image {ref_image_id} received for image with id {image_id}.")
+    
+    try:
+        db_insert.insert_ref(image_id, ref_image_id)
+        return {"message": "Added new reference."}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")

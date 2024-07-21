@@ -38,8 +38,8 @@ const FinalBoard: React.FC = () => {
     console.log("User UID: ", userUID);
     const checkForExistingPrivateKey = async () => {
       try {
-        const existingPrivateKeyCryptoObject = await IndexedDBServices.getItem("userPrivateKeyStore", userUID as string);
-        if (existingPrivateKeyCryptoObject) {
+        const existingPrivateKey = await IndexedDBServices.getItem("userPrivateKeyStore", userUID as string);
+        if (existingPrivateKey) {
           setShowGenerateKeyPopUp(false); 
           console.log('Private key found in IndexedDB');
         }else {

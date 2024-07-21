@@ -7,13 +7,13 @@ import config
 import requests
 
 
-async def save_image(userUID, originalFilename, filename, temp_filepath, signature, ref_filepath):
+async def save_image(userUID, originalFilename, filename, timestamp, temp_filepath, signature, ref_filepath):
     metadata = extract_metadata(temp_filepath)
     payload = {
         "user_uid": userUID,
         "original_filename": originalFilename,
         "filename": filename,
-        "timestamp": metadata.get("DateTime", ""),
+        "timestamp": timestamp,
         "caption": metadata.get("ImageDescription", ""),
         "location": metadata.get("GPSInfo", ""),
         "device_name": metadata.get("Model", ""),
@@ -57,10 +57,26 @@ async def save_verification_status(imageID, result, verificationTimestamp):
         print(f"Verification status saved for image with ID {imageID}.")
 
 
-async def save_uploaded_data_to_db(userUID, originalFilename, filename, temp_filepath, signature, verificationStatus, hash, ref_filepath):
-    imageID = await save_image(userUID, originalFilename, filename, temp_filepath, signature, ref_filepath)
+async def save_refs(imageID, refImageIDs):
+    for refImageID in refImageIDs:
+        payload = {
+            "image_id": imageID,
+            "ref_image_id": refImageID
+        }
+        url = f"{config.DB_ENDPOINT_URL}/insert/ref"
+        response = requests.post(url, json = payload)
+        if response.status_code != 200:
+            print(f"Error saving reference image for image with ID {imageID}.")
+        else:
+            print(f"Reference image saved for image with ID {imageID}.")
+
+
+async def save_uploaded_data_to_db(userUID, originalFilename, filename, temp_filepath, signature, verificationStatus, hash, refImageIDs):
+    timestamp = datetime.datetime.now().strftime('%Y:%m:%d %H:%M:%S.%f')
+    imageID = await save_image(userUID, originalFilename, filename, timestamp, temp_filepath, signature, "")
     await save_hash(imageID, hash)
-    await save_verification_status(imageID, verificationStatus, datetime.datetime.now().strftime('%Y:%m:%d %H:%M:%S.%f'))
+    await save_verification_status(imageID, verificationStatus, timestamp)
+    await save_refs(imageID, refImageIDs)
 
 
 def save_webp_image(filepath):

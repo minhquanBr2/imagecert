@@ -47,3 +47,21 @@ def insert_key_certi(userUID, certi, issuerName, notBefore, notAfter, status, pu
     ''', (userUID, certi, issuerName, notBefore, notAfter, status, publicKey))
     conn.commit()
     conn.close()
+
+
+def insert_ref(imageID, refImageID):
+    conn = sqlite3.connect(config.IMAGEDB_PATH)
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO ref (imageID, refImageID)
+        VALUES (?, ?)
+    ''', (imageID, refImageID))
+    conn.commit()
+    conn.close()
+
+
+if __name__ == "__main__":
+    for i in range(1, 15):
+        for j in range(14, 0, -1):
+            if i + j < 15 and i * j < 15:
+                insert_ref(i, j)
