@@ -20,27 +20,55 @@ def select_image(imageID, attributes: list):
     return results
 
 
-def select_key_certi_from_user_uid(user_uid):
+async def select_all_key_certis_from_user_uid(user_uid):
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
-    query = f'''SELECT * FROM keyCerti WHERE userUID = {user_uid}'''
+    query = f'''SELECT * FROM keyCerti WHERE userUID = '{user_uid}' ORDER BY certiID DESC'''
     cursor.execute(query)
-    results = cursor.fetchall()
+    records = cursor.fetchall()
     conn.commit()
     conn.close()
 
-    if len(results) == 0:
+    print("Results length: ", len(records))
+    if len(records) == 0:
         return None
     else:
-        return {
-            "user_uid": results[0][1],
-            "certi": results[0][2],
-            "issuer_name": results[0][3],
-            "not_before": results[0][4],
-            "not_after": results[0][5],
-            "status": results[0][6],
-            "public_key": results[0][7]
-        }
+        results = []
+        for record in records:
+            results.append({
+                "certi_id": record[0],
+                "user_uid": record[1],
+                "certi": record[2],
+                "issuer_name": record[3],
+                "not_before": record[4],
+                "not_after": record[5],
+                "status": record[6],
+                "public_key": record[7]
+            })
+        return results
+
+
+# def select_curr_key_certi_from_user_uid(user_uid):
+#     conn = sqlite3.connect(config.IMAGEDB_PATH)
+#     cursor = conn.cursor()
+#     query = f'''SELECT * FROM keyCerti WHERE userUID = {user_uid} AND status = 1'''
+#     cursor.execute(query)
+#     results = cursor.fetchall()
+#     conn.commit()
+#     conn.close()
+
+#     if len(results) == 0:
+#         return None
+#     else:
+#         return {
+#             "user_uid": results[0][1],
+#             "certi": results[0][2],
+#             "issuer_name": results[0][3],
+#             "not_before": results[0][4],
+#             "not_after": results[0][5],
+#             "status": results[0][6],
+#             "public_key": results[0][7]
+#         }
 
 
 def select_verification_history(admin_uid):

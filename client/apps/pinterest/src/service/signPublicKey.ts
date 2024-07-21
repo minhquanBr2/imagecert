@@ -18,12 +18,12 @@ export const getCertForPubkey = async () => {
       toast.error('Session key not found in local storage');
       return 0;
     }
-
-    const user = JSON.parse(sessionStorage.getItem(AUTH_KEY) as string);
-
+    
+    const user = JSON.parse(sessionStorage.getItem(AUTH_KEY) as string);    
     const publicKey : ArrayBuffer = await IndexedDBServices.getItem('userPublicKeyStore', user.uid);
-
+    
     const result =  await Challenge(publicKey);
+
     if (result){
       sessionStorage.removeItem('sessionKey');
       sessionStorage.removeItem('sessionID');

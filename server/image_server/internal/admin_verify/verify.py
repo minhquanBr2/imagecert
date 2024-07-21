@@ -1,8 +1,10 @@
 import datetime
 import config
 import requests
-from email.sendEmail import send_email_with_template
-from email.constant import pass_template, fail_template, subject, sender_email, sender_password
+import sys
+sys.path.append("..")
+from internal.email_send.sendEmail import send_email_with_template
+from internal.email_send.constant import pass_template, fail_template, subject, sender_email, sender_password
 from internal.utils.getEmailFromUid import get_user_email_by_uid
 
 def get_original_filename(image_id):

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
 from schemas.request_schemas import RequestUploadImage, RequestUploadHash, RequestUploadVerificationStatus, RequestUploadPublicKeyCerti, RequestUploadRef
-import db_insert
+import db_insert, db_select, db_update
 
 
 router = APIRouter(
@@ -73,14 +74,42 @@ async def insert_key_certi(request: RequestUploadPublicKeyCerti):
     not_after = request.not_after
     status = request.status
     public_key = request.public_key
-    print(f"Public key {public_key[:10]}...{public_key[-10:]} received from user {user_uid}.")
     
     try:
-        db_insert.insert_key_certi(user_uid, certi, issuer_name, not_before, not_after, status, public_key)
-        return {"message": "Public key registered successfully."}
+        all_key_certis = await db_select.select_all_key_certis_from_user_uid(user_uid)
+        curr_key_certi = {}
+        # check if the new certi existed:
+        if all_key_certis:
+            for key_certi in all_key_certis:
+                if key_certi["status"] == 1:
+                    curr_key_certi = key_certi
+                if key_certi["public_key"] == public_key and key_certi["status"] == 1:
+                    return JSONResponse(status_code=200, content="Public key already exists and is active.")
+                elif key_certi["public_key"] == public_key and key_certi["status"] == 0:
+                    return JSONResponse(status_code=401, content="Public key already exists but is inactive.")          
+            # key does not exist, set the status of the current key from 1 to 0, and insert new key
+            if curr_key_certi:
+                await db_update.update_key_certi(curr_key_certi["certi_id"], ["status"], [0])
+                print('user_uid: ', user_uid)
+                print('certi: ', certi[0:20] + '...' + certi[-20:])
+                print('issuer_name: ', issuer_name)
+                print('not_before: ', not_before)
+                print('not_after: ', not_after)
+                print('status: ', status)
+                print('public_key: ', public_key[0:20] + '...' + public_key[-20:])
+                await db_insert.insert_key_certi(user_uid, certi, issuer_name, not_before, not_after, status, public_key)
+                print("Public key registered successfully.")
+                return JSONResponse(status_code=200, content="Public key registered successfully.")
+            else:
+                print("An error occured when storing key certificate into DB.")
+                return JSONResponse(status_code=500, content="An error occured when storing key certificate into DB.")
+        else:
+            await db_insert.insert_key_certi(user_uid, certi, issuer_name, not_before, not_after, status, public_key)
+            print("Public key registered successfully.")
+            return JSONResponse(status_code=200, content="Public key registered successfully.")
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        return JSONResponse(status_code=500, content=f"Internal server error: {str(e)}")
 
 
 @router.post("/ref")

@@ -96,12 +96,8 @@ async def verify_endpoint(request: Request):
     
     if challenge_response != challenge:
         return JSONResponse(content={"message": "Verification failed. Challenge response does not match the challenge."}, status_code=400)
-    
-    
-    # CALL REQUEST TO CHECK IF CERTI IS IN DB
-    
-    # CERTI IS NOT IN DB => SIGN  
-    
+        
+    # SIGN CERTI
     ca_private_key = load_ca_private_key()
     subject = issuer = x509.Name([
         x509.NameAttribute(NameOID.COUNTRY_NAME, u"VN"),
@@ -149,10 +145,12 @@ async def verify_endpoint(request: Request):
 
     print('certi_payload', certi_payload)
 
+    # call request to db to insert certi 
     db_response = insertKeyCerti(certi_payload)
-    print('db_response', db_response)
+    print('status code', db_response.status_code)
+    print('content', db_response.json())
 
-    return db_response
+    return JSONResponse(status_code=db_response.status_code, content=db_response.json())
 
     # CERTI IS IN DB => VERIFY  
 

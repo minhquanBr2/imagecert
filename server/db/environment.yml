@@ -5,6 +5,7 @@ dependencies:
   - _libgcc_mutex=0.1=main
   - _openmp_mutex=5.1=1_gnu
   - asttokens=2.0.5=pyhd3eb1b0_0
+  - beautifulsoup4=4.12.3=py310h06a4308_0
   - bzip2=1.0.8=h5eee18b_6
   - ca-certificates=2024.7.2=h06a4308_0
   - click=8.1.7=py310h06a4308_0
@@ -48,6 +49,7 @@ dependencies:
   - readline=8.2=h5eee18b_0
   - setuptools=69.5.1=py310h06a4308_0
   - six=1.16.0=pyhd3eb1b0_1
+  - soupsieve=2.5=py310h06a4308_0
   - sqlite=3.45.3=h5eee18b_0
   - stack_data=0.2.0=pyhd3eb1b0_0
   - tk=8.6.14=h39e8969_0

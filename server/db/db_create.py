@@ -89,13 +89,15 @@ def create_table_image_certi():
     conn.close()
 
 
+# status = 0: inactive
+# status = 1: active
 def create_table_key_certi():
     conn = db_connect.connect_db()
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS keyCerti (
             certiID INTEGER PRIMARY KEY AUTOINCREMENT,
-            userUID INTEGER NOT NULL,
+            userUID TEXT NOT NULL,
             certi TEXT NOT NULL,
             issuerName TEXT NOT NULL,
             notBefore TEXT NOT NULL,
@@ -128,5 +130,5 @@ if __name__ == "__main__":
     # create_table_hash()
     # create_table_verification_status()
     # create_table_image_certi()
-    # create_table_key_certi()
-    create_table_ref()
+    create_table_key_certi()
+    # create_table_ref()

@@ -57,7 +57,6 @@ const FinalBoard: React.FC = () => {
   const handleGenerateNewKeyPair = async () => {
     try {
       const { publicKey, privateKey } = await KeyManager.generateKeyPair(userUID as string);
-      // const privateKeyCryptoObject = await KeyManager.importPrivateKey(privateKey);
       await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKey);
       await IndexedDBServices.setItem("userPublicKeyStore", userUID as string, publicKey);
       const result = await getCertForPubkey();
@@ -66,8 +65,11 @@ const FinalBoard: React.FC = () => {
         toast.success("Key pair uploaded successfully!");
         setShowGenerateKeyPopUp(false);
       }
-      else
+      else {
+        await IndexedDBServices.removeItem("userPrivateKeyStore", userUID as string);
+        await IndexedDBServices.removeItem("userPublicKeyStore", userUID as string);
         toast.error("Key pair upload failed!");
+      }
 
     } catch (error) {
       console.error('Error generating or storing new key pair:', error);
@@ -117,8 +119,11 @@ const FinalBoard: React.FC = () => {
         toast.success("Key pair uploaded successfully!");
         setShowGenerateKeyPopUp(false);
       }
-      else
-        toast.error("Key pair upload failed!");
+      else {        
+        await IndexedDBServices.removeItem("userPrivateKeyStore", userUID as string);
+        await IndexedDBServices.removeItem("userPublicKeyStore", userUID as string);
+        toast.error("Key pair upload failed: Old key pair detected!");
+      }
     } catch (error) {
       console.error('Error uploading key pair:', error);
     }

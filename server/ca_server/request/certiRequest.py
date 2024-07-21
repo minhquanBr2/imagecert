@@ -10,5 +10,5 @@ def getKeyCert(uid):
 def insertKeyCerti(payload):
     url = BASE_URL + 'insert/key_certi'
     response = requests.post(url, json=payload)
-    return response.json()
+    return response
     

@@ -3,10 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from routers import upload, admin_verify
 from middlewares.firebase.firebase_middleware import FirebaseAuthMiddleware
-import firebase_admin
-from internal.firebase.config import firebaseConfig
 
-firebase_admin.initialize_app(options=firebaseConfig)
 
 app = FastAPI()
 app.mount("/image", StaticFiles(directory="../data/images/perm"), name="images")            # Mount the images directory to serve static files
