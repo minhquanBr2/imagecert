@@ -153,6 +153,21 @@ def select_all_images():
     return results
 
 
+def select_user_uid_from_image_id(image_id: int):
+    conn = sqlite3.connect(config.IMAGEDB_PATH)
+    cursor = conn.cursor()
+    query = f'''SELECT userUID FROM image WHERE imageID = {image_id}'''
+    cursor.execute(query)
+    results = cursor.fetchall()
+    conn.commit()
+    conn.close()
+
+    if len(results) == 0:
+        return None
+    else:
+        return results[0][0]
+
+
 
     
 

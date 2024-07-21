@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
 from db import db_select
 
 
@@ -76,5 +77,19 @@ async def select_all_images():
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.get("/image/{image_id}/user_uid")
+async def select_image_user_uid(image_id: int):
+    print(f"Retrieving user UID for image {image_id}...")
+    
+    try:
+        results = db_select.select_user_uid_from_image_id(image_id)
+        if results == None:
+            return {"message": f"Image with ID {image_id} not found."}
+        return {"message": results}
+
+    except Exception as e:
+        raise JSONResponse(status_code=500, content=f"Internal server error: {str(e)}")
 
     

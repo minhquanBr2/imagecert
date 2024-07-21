@@ -1,6 +1,4 @@
-import sqlite3
 import config
-import os
 import requests
 
 
@@ -30,7 +28,7 @@ async def get_all_images():
     return results
 
 
-async def get_verification_history(admin_uid):
+async def get_verification_history(admin_uid: str):
     url = f"{config.DB_ENDPOINT_URL}/select/verification_history/{admin_uid}"
     response = requests.get(url)
     if response.status_code != 200:
