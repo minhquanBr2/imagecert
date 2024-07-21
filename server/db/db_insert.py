@@ -4,7 +4,7 @@ sys.path.append("..")
 import config
 
 
-def insert_image(userUID, originalFilename, filename, timestamp, caption, location, deviceName, signature, ref_filepath):
+async def insert_image(userUID, originalFilename, filename, timestamp, caption, location, deviceName, signature, ref_filepath):
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     cursor.execute('''
@@ -16,7 +16,7 @@ def insert_image(userUID, originalFilename, filename, timestamp, caption, locati
     return cursor.lastrowid
 
 
-def insert_hash(imageID, type, value):
+async def insert_hash(imageID, type, value):
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     cursor.execute('''
@@ -27,7 +27,7 @@ def insert_hash(imageID, type, value):
     conn.close()
 
 
-def insert_verification_status(imageID, adminUID, result, verificationTimestamp):
+async def insert_verification_status(imageID, adminUID, result, verificationTimestamp):
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     cursor.execute('''
@@ -38,7 +38,7 @@ def insert_verification_status(imageID, adminUID, result, verificationTimestamp)
     conn.close()
 
 
-def insert_key_certi(userUID, certi, issuerName, notBefore, notAfter, status, publicKey):
+async def insert_key_certi(userUID, certi, issuerName, notBefore, notAfter, status, publicKey):
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     cursor.execute('''
@@ -49,7 +49,7 @@ def insert_key_certi(userUID, certi, issuerName, notBefore, notAfter, status, pu
     conn.close()
 
 
-def insert_ref(imageID, refImageID):
+async def insert_ref(imageID, refImageID):
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     cursor.execute('''

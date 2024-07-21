@@ -2,7 +2,7 @@ import sqlite3
 import config
 
 
-def update_image(imageID, attributes: list, values: list):
+async def update_image(imageID, attributes: list, values: list):
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     query = 'UPDATE image SET '
@@ -12,12 +12,14 @@ def update_image(imageID, attributes: list, values: list):
             query += ', '
     query += ' WHERE imageID = ?'
     values.append(imageID)
+    print(888)
     cursor.execute(query, values)
+    print(889)
     conn.commit()
     conn.close()
 
 
-def update_hash(hashID, attributes: list, values: list):
+async def update_hash(hashID, attributes: list, values: list):
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     query = 'UPDATE hash SET '
@@ -32,7 +34,7 @@ def update_hash(hashID, attributes: list, values: list):
     conn.close()
 
 
-def update_verification_status(statusID, attributes: list, values: list):
+async def update_verification_status(statusID, attributes: list, values: list):
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     query = 'UPDATE verificationStatus SET '
@@ -47,7 +49,7 @@ def update_verification_status(statusID, attributes: list, values: list):
     conn.close()
 
 
-def update_key_certi(certiID, attributes: list, values: list):
+async def update_key_certi(certiID, attributes: list, values: list):
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     query = 'UPDATE keyCerti SET '

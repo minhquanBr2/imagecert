@@ -6,6 +6,7 @@ import IndexedDBServices from "./indexDB";
 import forge from 'node-forge';
 
 export const Challenge = async (user_public_key : ArrayBuffer) => {
+  
   const pubkeyBase64 = arrayBufferToBase64(user_public_key);
   if (!sessionStorage.getItem(AUTH_KEY)) {
     return null;
@@ -16,13 +17,13 @@ export const Challenge = async (user_public_key : ArrayBuffer) => {
     user_public_key: pubkeyBase64,
     user_id: user.uid
   }
-
+  
   try {
     const response = await ca_http.post('/zkp/challenge', payload);
     if (response.status !== 200) {
       throw new Error(`Server responded with status: ${response.status}`);
     }
-    // console.log('challenge', response.data.challenge);
+    console.log('challenge', response.data.challenge);
     const encryptedChallenge = base64ToArrayBuffer(response.data.challenge);
     const privateKeyArrayBuffer = await IndexedDBServices.getItem('userPrivateKeyStore', user.uid);
     const privateKey = await window.crypto.subtle.importKey(

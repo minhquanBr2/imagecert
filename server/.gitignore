@@ -5,5 +5,5 @@ __pycache__
 data
 credential
 config.py
-
 image_server/internal/email/constant.py
+image_server/internal/email_send/constant.py
