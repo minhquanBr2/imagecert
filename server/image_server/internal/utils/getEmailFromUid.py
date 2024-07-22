@@ -4,20 +4,24 @@ import sys
 sys.path.append("..")
 sys.path.append("../..")
 sys.path.append("../../..")
-from middlewares.firebase.firebase_init import appUser, appAdmin
+# from middlewares.firebase.firebase_init import appUser, appAdmin
 
 
-print(appAdmin.credential)
-print(appAdmin.name)
-print(appAdmin.project_id)
+# print(dir(appUser))
+# print(appUser.credential.get_credential())
+# print(appUser.name)
+# print(appUser.project_id)
 
 
 def get_user_email_by_uid(uid: str) -> str:
     try:
-        user = auth.get_user(uid=uid, app=appAdmin)
-        print(f"User: {user}")
-        return user
+        user = auth.get_user(uid=uid)
+        print(f"User: {user.email}")
+
+        return user.email
     except Exception as e:
         print(f'Error retrieving user data: {e}')
         return 'x'
+    
+
   
