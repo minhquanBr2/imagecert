@@ -61,7 +61,10 @@ async function savePin(
     setIsLoading(false);
   }).catch((error) => {
     console.error('Error uploading image', error);
-    toast.error('Error uploading image');
+    if (error.message == "Request failed with status code 409")
+      toast.error("Image is rejected.");
+    else
+      toast.error(error.message);
     setIsLoading(false);
     return;
   });

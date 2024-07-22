@@ -24,7 +24,7 @@ async def insert_image(request: RequestUploadImage):
     print(f"File {original_filename} received from user {user_uid}.")
     
     try:
-        image_id = db_insert.insert_image(user_uid, original_filename, filename, timestamp, caption, location, device_name, signature, ref_filepath)
+        image_id = await db_insert.insert_image(user_uid, original_filename, filename, timestamp, caption, location, device_name, signature, ref_filepath)
         print("image id: ", image_id)
         return {"message": {
             "image_id": image_id
@@ -42,7 +42,7 @@ async def insert_hash(request: RequestUploadHash):
     print(f"Hash {value} received for image with id {image_id}.")
     
     try:
-        db_insert.insert_hash(image_id, hash_type, value)
+        await db_insert.insert_hash(image_id, hash_type, value)
         return {"message": "Hash registered successfully."}
 
     except Exception as e:
@@ -58,7 +58,7 @@ async def insert_verification_status(request: RequestUploadVerificationStatus):
     print(f"Verification status {result} received for image with id {image_id}.")
     
     try:
-        db_insert.insert_verification_status(image_id, admin_uid, result, verification_timestamp)
+        await db_insert.insert_verification_status(image_id, admin_uid, result, verification_timestamp)
         return {"message": "Verification status registered successfully."}
 
     except Exception as e:
@@ -119,7 +119,7 @@ async def insert_ref(request: RequestUploadRef):
     print(f"Reference image {ref_image_id} received for image with id {image_id}.")
     
     try:
-        db_insert.insert_ref(image_id, ref_image_id)
+        await db_insert.insert_ref(image_id, ref_image_id)
         return {"message": "Added new reference."}
 
     except Exception as e:

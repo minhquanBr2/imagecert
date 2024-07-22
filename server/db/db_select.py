@@ -20,6 +20,17 @@ def select_image(imageID, attributes: list):
     return results
 
 
+def select_all_hashes():
+    conn = sqlite3.connect(config.IMAGEDB_PATH)
+    cursor = conn.cursor()
+    query = '''SELECT imageID, value FROM hash'''
+    cursor.execute(query)
+    results = cursor.fetchall()
+    conn.commit()
+    conn.close()
+    return results
+
+
 async def select_all_key_certis_from_user_uid(user_uid):
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
