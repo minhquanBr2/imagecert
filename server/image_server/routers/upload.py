@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request, Form, File, UploadFile, HTTPException, Depends
+from fastapi.responses import JSONResponse
 import sys 
 sys.path.append('..')
 from internal.upload.save import save_uploaded_data_to_db, save_webp_image, save_temp_image
@@ -19,7 +20,7 @@ async def upload_image(request: Request, signature: str = Form(...), file: Uploa
     
     try:         
         original_filename, filename, temp_filepath = save_temp_image(file)
-        verification_status, hash_object, ref_image_ids = self_verify_image(temp_filepath)
+        verification_status, hash_object, ref_image_ids = await self_verify_image(temp_filepath)
         print(f"Verification status: {verification_status}.")
 
         if verification_status == config.VERIFICATION_STATUS["ACCEPTED"]:
@@ -31,7 +32,7 @@ async def upload_image(request: Request, signature: str = Form(...), file: Uploa
             await save_uploaded_data_to_db(user_uid, original_filename, filename, perm_filepath, signature, verification_status, hash_object, ref_image_ids)
             return {"message": f"Image {original_filename} is under consideration."}
         else:
-            return {"message": f"Image {original_filename} is rejected."}
+            return JSONResponse(status_code=409, content={"message": f"Image {original_filename} is rejected."})
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")

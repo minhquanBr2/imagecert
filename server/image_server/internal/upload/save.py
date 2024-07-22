@@ -73,7 +73,8 @@ async def save_refs(imageID, refImageIDs):
 
 async def save_uploaded_data_to_db(userUID, originalFilename, filename, temp_filepath, signature, verificationStatus, hash, refImageIDs):
     timestamp = datetime.datetime.now().strftime('%Y:%m:%d %H:%M:%S.%f')
-    imageID = await save_image(userUID, originalFilename, filename, timestamp, temp_filepath, signature, "")
+    imageID = await save_image(userUID, originalFilename, filename, timestamp, temp_filepath, signature, "dummy_filepath")
+    print(f"Image ID: {imageID}")
     await save_hash(imageID, hash)
     await save_verification_status(imageID, verificationStatus, timestamp)
     await save_refs(imageID, refImageIDs)

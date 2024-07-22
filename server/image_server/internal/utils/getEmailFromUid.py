@@ -7,14 +7,14 @@ sys.path.append("../../..")
 from middlewares.firebase.firebase_init import appUser, appAdmin
 
 
-print(appUser.credential)
-print(appUser.name)
-print(appUser.project_id)
+print(appAdmin.credential)
+print(appAdmin.name)
+print(appAdmin.project_id)
 
 
 def get_user_email_by_uid(uid: str) -> str:
     try:
-        user = auth.get_user(uid, app=appAdmin)
+        user = auth.get_user(uid=uid, app=appAdmin)
         print(f"User: {user}")
         return user
     except Exception as e:
