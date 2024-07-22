@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Request, Depends
 from internal.admin_verify import display, verify
 from schemas.request_schemas import RequestVerifyImage
 import config
+from internal.utils import getEmailFromUid, getUserUidFromImageID
 
 
 router = APIRouter(
@@ -42,7 +43,7 @@ async def verify_image(request: RequestVerifyImage):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-# @router.get("/image/{image_id}/user_uid")
-# async def get_user_uid_from_image_id(image_id: int):
-#     results = await display.get_user_uid_from_image_id(image_id)
-#     return results
+@router.get("/email/{user_uid}")
+async def get_email_by_user_uid(user_uid: str):
+    results = getEmailFromUid.get_user_email_by_uid(user_uid)
+    return results

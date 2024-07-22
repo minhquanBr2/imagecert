@@ -18,6 +18,7 @@ const prepareHeader = (config : any) => {
   }
 
   if (token) {
+    console.log('Token:', token);
     config.headers.Authorization = `Bearer ${token}`;
   }
 
