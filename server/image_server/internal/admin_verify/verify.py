@@ -6,6 +6,7 @@ sys.path.append("..")
 from internal.email_send.sendEmail import send_email_with_template
 from internal.email_send.constant import pass_template, fail_template, subject, sender_email, sender_password
 from internal.utils.getEmailFromUid import get_user_email_by_uid
+from internal.upload.save import save_verification_status
 
 
 def get_original_filename(image_id: str):
@@ -21,20 +22,13 @@ def get_original_filename(image_id: str):
     return results[0][0]
 
 
-def verify_image(image_id: int, admin_uid: str, result: int):
+async def verify_image(image_id: int, admin_uid: str, result: int):
     original_filename = get_original_filename(image_id)
     if original_filename == None:
         return {"message": f"Image {image_id} not found."}    
     
-    url = f"{config.DB_ENDPOINT_URL}/insert/verification_status"   
-    payload = {
-        "image_id": image_id,
-        "admin_uid": admin_uid,
-        "result": result,
-        "verification_timestamp": str(datetime.datetime.now().strftime('%Y%m%d%H%M%S%f'))
-    } 
-
-    response = requests.post(url, json = payload)
+    timestamp = str(datetime.datetime.now().strftime('%Y%m%d%H%M%S%f'))
+    response = await save_verification_status(image_id, admin_uid, result, timestamp)
     if response.status_code != 200:
         return {"message": f"Error saving verification status for image {image_id}."}    
 

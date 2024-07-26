@@ -1,3 +1,4 @@
+from mytypes.HashGeneratorFactory import get_crypto_hash_algorithm
 from fastapi import APIRouter, Request, Form, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 import sys 
@@ -14,6 +15,8 @@ router = APIRouter(
     prefix = '/handshake',
     tags = ['handshake'],
 )
+
+crypto_hash_algo = get_crypto_hash_algorithm()
 
 @router.post("/client_hello")
 async def client_hello(request: ClientHelloRequest, auth_request: Request):
@@ -68,8 +71,8 @@ async def store_session_key(request: EncryptedPayloadRequest):
         decrypted_payload = ca_private_key.decrypt(
                 encrypted_payload,
                 padding.OAEP(
-                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                    algorithm=hashes.SHA256(),
+                    mgf=padding.MGF1(algorithm=crypto_hash_algo),
+                    algorithm=crypto_hash_algo,
                     label=None
                 )
             )
