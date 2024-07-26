@@ -1,5 +1,5 @@
 import config
-from internal.upload.hash import compute_perceptual_hash, get_all_hash_values
+from internal.upload.hash import HashManager, get_all_hash_values, get_image_last_verification_status
 
 
 HIGH_THRESHOLD = 0.95
@@ -28,11 +28,10 @@ def get_hash_similarity(hash1, hash2):
         return similarity
     except:
         return 0.0
-    # return 0.72
 
 
 async def self_verify_image(filepath: str):
-    hash_object = compute_perceptual_hash(filepath)
+    hash_object = HashManager().get_hash_generator('pHash').compute_hash(filepath)
     hash_value = hash_object["value"]
     saved_hash_values = await get_all_hash_values()
     print(f"{len(saved_hash_values)} hash values retrieved from database.")
@@ -46,7 +45,10 @@ async def self_verify_image(filepath: str):
     # second image...
     for image_id, saved_hash_value in saved_hash_values:
         similarity = get_hash_similarity(hash_value, saved_hash_value)
-        if similarity >= HIGH_THRESHOLD:
+        if similarity == 1 and await get_image_last_verification_status(image_id) == config.VERIFICATION_STATUS["REJECTED"]:
+            print("REJECTED")
+            return config.VERIFICATION_STATUS["REJECTED"], hash_object, ref_image_ids
+        elif similarity >= HIGH_THRESHOLD:
             ref_image_ids.append(image_id)
             print("REJECTED")
             return config.VERIFICATION_STATUS["REJECTED"], hash_object, ref_image_ids
