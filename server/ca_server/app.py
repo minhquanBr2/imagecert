@@ -7,6 +7,8 @@ from middleware.encryptDecrypt import EncryptMiddleware, DecryptMiddleware
 from routes import challenge, handshake
 from utils.key import generate_ca_key_pair
 
+generate_ca_key_pair()
+
 firebase_admin.initialize_app(options=firebaseConfig)
 
 app = FastAPI()
@@ -23,7 +25,7 @@ app.add_middleware(
     allow_credentials=True
 )
 
-generate_ca_key_pair()
+
 
 routers = [
     handshake.router,

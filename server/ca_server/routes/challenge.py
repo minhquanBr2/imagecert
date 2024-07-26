@@ -1,3 +1,4 @@
+from mytypes.HashGeneratorFactory import get_crypto_hash_algorithm
 from fastapi import APIRouter, Request, Form, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 import sys 
@@ -22,6 +23,8 @@ router = APIRouter(
 
 # Store for challenges associated with public keys
 challenge_store = {}
+
+crypto_hash_algo = get_crypto_hash_algorithm()
 
 
 @router.post("/challenge")
@@ -59,8 +62,8 @@ async def challenge_endpoint(request: Request):
     encrypted_challenge = user_public_key.encrypt(
         challenge,
         padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
+            mgf=padding.MGF1(algorithm=crypto_hash_algo),
+            algorithm=crypto_hash_algo,
             label=None
         )
     )
@@ -124,7 +127,7 @@ async def verify_endpoint(request: Request):
     ).add_extension(
         x509.SubjectAlternativeName([x509.DNSName(u"localhost")]),
         critical=False,
-    ).sign(ca_private_key, hashes.SHA256(), default_backend())
+    ).sign(ca_private_key,crypto_hash_algo, default_backend())
 
     cert_der = cert.public_bytes(serialization.Encoding.DER)
     cert_base64 = base64.b64encode(cert_der).decode('utf-8')
