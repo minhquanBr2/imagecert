@@ -51,10 +51,7 @@ async def save_verification_status(imageID, result, verificationTimestamp):
     }
     url = f"{config.DB_ENDPOINT_URL}/insert/verification_status"
     response = requests.post(url, json = payload)
-    if response.status_code != 200:
-        print(f"Error saving verification status for image with ID {imageID}.")
-    else:
-        print(f"Verification status saved for image with ID {imageID}.")
+    return response
 
 
 async def save_refs(imageID, refImageIDs):
