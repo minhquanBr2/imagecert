@@ -177,9 +177,4 @@ def select_user_uid_from_image_id(image_id: int):
         return None
     else:
         return results[0][0]
-
-
-
-    
-
     

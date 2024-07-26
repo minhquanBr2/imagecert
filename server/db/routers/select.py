@@ -105,5 +105,4 @@ async def select_all_hashes():
 
     except Exception as e:
         raise JSONResponse(status_code=500, content=f"Internal server error: {str(e)}")
-
     
