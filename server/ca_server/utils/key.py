@@ -40,6 +40,7 @@ def load_ca_private_key():
             )
         return private_key
     else:
+        generate_ca_key_pair()
         raise FileNotFoundError("CA private key file not found.")
 
 def load_ca_public_key():
@@ -51,6 +52,7 @@ def load_ca_public_key():
             )
         return public_key
     else:
+        generate_ca_key_pair()
         raise FileNotFoundError("CA public key file not found.")
 
 def store_session_key(session_id: str, encrypted_session_key: str):
