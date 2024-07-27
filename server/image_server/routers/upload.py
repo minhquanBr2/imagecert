@@ -5,6 +5,7 @@ sys.path.append('..')
 from internal.upload.save import save_uploaded_data_to_db, save_webp_image, save_temp_image
 from internal.upload.self_verify import self_verify_image
 import config
+from internal.upload.display import get_all_images
 
 
 router = APIRouter(
@@ -40,5 +41,5 @@ async def upload_image(request: Request, signature: str = Form(...), file: Uploa
 
 @router.get("/get_all")
 async def get_all_images():
-    results = await display.get_all_images()
+    results = await get_all_images()
     return results
