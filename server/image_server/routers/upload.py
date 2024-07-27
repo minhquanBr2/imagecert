@@ -37,3 +37,8 @@ async def upload_image(request: Request, signature: str = Form(...), file: Uploa
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
+
+@router.get("/get_all")
+async def get_all_images():
+    results = await display.get_all_images()
+    return results
