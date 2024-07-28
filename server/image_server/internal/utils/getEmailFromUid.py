@@ -4,8 +4,6 @@ import sys
 sys.path.append("..")
 sys.path.append("../..")
 sys.path.append("../../..")
-# from middlewares.firebase.firebase_init import appUser, appAdmin
-
 
 # print(dir(appUser))
 # print(appUser.credential.get_credential())
