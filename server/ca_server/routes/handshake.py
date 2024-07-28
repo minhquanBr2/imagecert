@@ -89,7 +89,7 @@ async def store_session_key(request: EncryptedPayloadRequest):
         client_uid = payload.get('client_uid')
         
 
-        if client_uid not in session_keys:
+        if client_uid not in session_keys or session_keys[client_uid]['session_id'] != session_id:
             return JSONResponse(content={"message": "Session ID not found."}, status_code=400)
             
 
