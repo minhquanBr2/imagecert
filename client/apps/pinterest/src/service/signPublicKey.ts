@@ -35,6 +35,9 @@ export const getCertForPubkey = async () => {
     }
   }catch(error){
     console.error('Error getting cert for public key:', error);
+    if (sessionStorage.getItem('sessionKey')){
+      sessionStorage.removeItem('sessionKey');
+    }
     return 0;
   }
 }

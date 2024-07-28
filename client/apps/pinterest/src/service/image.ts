@@ -27,7 +27,7 @@ const uploadImage = async (imageFile: File, signature: string) => {
 };
 
 const getAll = async () => {
-  const response = await api_http.get(`${IMAGE_URL}/select/all_images`);
+  const response = await api_http.get(`${IMAGE_URL}/upload/get_all`);
   return response.data;
 }
 

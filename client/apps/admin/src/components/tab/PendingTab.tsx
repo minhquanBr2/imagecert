@@ -33,7 +33,7 @@ const PendingTab: React.FC = () => {
 
   const handleVerify = async (result: number) => {
     if (!pendingImages[0]) return;
-
+    console.log('Verifying image', pendingImages[0].imageID, result);
     await verifyImage(pendingImages[0].imageID, user?.uid ?? "", result);
     fetchPendingImages();
   };
@@ -53,7 +53,7 @@ const PendingTab: React.FC = () => {
       <Box flexGrow={1} >
         {pendingImages[0] && (
           <Paper elevation={5} style={{ padding: 16, display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <img src={pendingImages[0].imageURL} alt="Current" width="300" height="300" />
+            {pendingImages[0].imageURL ? <img src={pendingImages[0].imageURL} alt="Current" style={{ maxWidth: "700px"}} height="300" /> : <div>No pending images</div>}
             <Box mt={2}>
               <Button
                 variant="contained"
