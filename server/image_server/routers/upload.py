@@ -5,6 +5,7 @@ sys.path.append('..')
 from internal.upload.save import save_uploaded_data_to_db, save_webp_image, save_temp_image
 from internal.upload.self_verify import self_verify_image
 import config
+import requests
 
 
 router = APIRouter(
@@ -37,3 +38,16 @@ async def upload_image(request: Request, signature: str = Form(...), file: Uploa
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
+
+@router.get("/get_all")
+async def get_all_images():
+    url = f"{config.DB_ENDPOINT_URL}/select/all_images"
+    response = requests.get(url)
+    if response.status_code != 200:
+        return {"message": f"Internal server error with status code {response.status_code}."}
+
+    results = response.json()["message"]
+    if len(results) == 0:
+        return {"message": "No images found."}
+
+    return results

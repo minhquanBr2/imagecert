@@ -3,7 +3,7 @@ from internal.admin_verify import display, verify
 from schemas.request_schemas import RequestVerifyImage
 import config
 from internal.utils import getEmailFromUid, getUserUidFromImageID
-
+from fastapi.responses import JSONResponse
 
 router = APIRouter(
     prefix = '/admin_verify',
@@ -16,11 +16,6 @@ async def get_pending_images():
     results = await display.get_pending_images()
     return results
 
-
-@router.get("/get_all")
-async def get_all_images():
-    results = await display.get_all_images()
-    return results
 
 
 @router.get("/verification_history/{admin_uid}")
@@ -37,8 +32,11 @@ async def verify_image(request: RequestVerifyImage):
         admin_uid = request.admin_uid
         result = config.VERIFICATION_STATUS_FE_BE_MAPPING[request.result]
         print(f"Verification request received from admin {admin_uid}.")
-        verify.verify_image(image_id, admin_uid, result)
-        return {"message": "Image verification status updated successfully."}
+        response = await verify.verify_image(image_id, admin_uid, result)
+        print('response:', response)
+        if "Error" in response.get("message", ""):
+            raise RuntimeError(response["message"])
+        return JSONResponse(content=response, status_code=200)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 

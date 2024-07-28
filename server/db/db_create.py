@@ -125,10 +125,10 @@ def create_table_ref():
 
 
 if __name__ == "__main__":
-    # create_table_user()
-    # create_table_image()
-    # create_table_hash()
-    # create_table_verification_status()
-    # create_table_image_certi()
+    create_table_user()
+    create_table_image()
+    create_table_hash()
+    create_table_verification_status()
+    create_table_image_certi()
     create_table_key_certi()
-    # create_table_ref()
+    create_table_ref()

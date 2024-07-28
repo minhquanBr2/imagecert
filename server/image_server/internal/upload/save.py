@@ -42,10 +42,10 @@ async def save_hash(imageID, hash):
         print(f"Hash saved for image with ID {imageID}.")
     
 
-async def save_verification_status(imageID, result, verificationTimestamp):
+async def save_verification_status(imageID, admin_uid, result, verificationTimestamp):
     payload = {
         "image_id": imageID,
-        "admin_uid": "",
+        "admin_uid": admin_uid,
         "result": result,
         "verification_timestamp": verificationTimestamp
     }
