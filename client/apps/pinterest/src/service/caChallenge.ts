@@ -59,12 +59,17 @@ export const Challenge = async (user_public_key : ArrayBuffer) => {
 
     // console.log('response2', response2);
     if (response2.status !== 200) {
-      throw new Error(`Server responded with status: ${response2.status}`);
+      if (sessionStorage.getItem('sessionKey')){
+        sessionStorage.removeItem('sessionKey');
+      }
+     console.error(`Server responded with status: ${response2.status}`);
     }
 
     return response2.data;
   } catch (error) {
     console.error('Error during challenge request:', error);
-    throw error;
+    if (sessionStorage.getItem('sessionKey')){
+      sessionStorage.removeItem('sessionKey');
+    }
   }
 }

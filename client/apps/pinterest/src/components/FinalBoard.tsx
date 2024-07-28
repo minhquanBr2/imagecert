@@ -134,10 +134,10 @@ const FinalBoard: React.FC = () => {
     let pinsArray: any[] = [];
     const firebaseData = await ImageServices.getAll();
     console.log('Firebase data: ', firebaseData);
-    firebaseData.message.map((pin: any) => {
+    firebaseData.map((pin: any) => {
       pinsArray.push(
         <Pin
-          key={pin.imageID}
+          key={pin.imageID} 
           pinDetails={pin}
           openPin={openPin}
         />
