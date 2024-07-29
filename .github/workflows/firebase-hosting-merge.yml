@@ -11,6 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Change working directory
+      - run: cd ./client/apps/pinterest
+      - name: Install dependencies and build
       - run: npm i && npm run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
