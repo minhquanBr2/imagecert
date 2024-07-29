@@ -71,6 +71,7 @@ const PendingTab: React.FC = () => {
         )}
       </Box>
       <Box flexGrow={2} width="300px" height="500px" ml={2}>
+        <Typography variant="h5" gutterBottom textAlign="center"> Reference List</Typography>
         <AutoSizer>
           {({ height, width }) => (
             <List
