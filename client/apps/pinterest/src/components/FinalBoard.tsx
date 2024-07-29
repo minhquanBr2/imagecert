@@ -4,7 +4,6 @@ import { deletePinBackend, fetchPinsBackend } from '../firebase_setup/DatabaseOp
 import { Tooltip } from 'antd';
 
 import '../styles/final_board_styles.css';
-import autoAnimate from '@formkit/auto-animate';
 import { Header, LoadingIcon, Modal, OpenPin, Pin } from './index.ts';
 import RandomPin from './RandomPin.tsx';
 import { PinDetails } from '../interface/PinData.ts';
