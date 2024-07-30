@@ -4,15 +4,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import upload, admin_verify
 from middlewares.firebase.firebase_middleware import FirebaseAuthMiddleware
 from firebase_admin import credentials, auth
+from config import FIREBASE_ADMIN_SDK, PERM_IMAGE_DIR
 import firebase_admin
 
-cred = credentials.Certificate('/home/khang/imagecert/server/image_server/credential/imageca-5c31b-firebase-adminsdk-cf4th-324d39aa3b.json')
+
+# Initialize Firebase Admin SDK
+cred = credentials.Certificate(FIREBASE_ADMIN_SDK)
 firebase_admin.initialize_app(credential=cred)
 
+
+# Initialize FastAPI app
 app = FastAPI()
-app.mount("/image", StaticFiles(directory="../data/images/perm"), name="images")            # Mount the images directory to serve static files
+app.mount("/image", StaticFiles(directory=PERM_IMAGE_DIR), name="images")            # Mount the images directory to serve static files
 
 
+# Add middlewares
 app.add_middleware(FirebaseAuthMiddleware)
 app.add_middleware(
     CORSMiddleware,

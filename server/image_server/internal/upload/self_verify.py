@@ -1,5 +1,5 @@
 import config
-from internal.upload.hash import HashManager, get_all_hash_values, get_image_last_verification_status
+from internal.upload.hash import HashManager, get_all_accepted_hash_values, get_image_last_verification_status
 
 
 HIGH_THRESHOLD = 0.95
@@ -33,18 +33,22 @@ def get_hash_similarity(hash1, hash2):
 async def self_verify_image(filepath: str):
     hash_object = HashManager().get_hash_generator('pHash').compute_hash(filepath)
     hash_value = hash_object["value"]
-    saved_hash_values = await get_all_hash_values()
+    saved_hash_values = await get_all_accepted_hash_values()
+    highest_similarity = 0.0
     print(f"{len(saved_hash_values)} hash values retrieved from database.")
     ref_image_ids = []
 
     # first image
     if saved_hash_values is None:
-        print("ACCEPTED")
+        print("newly ACCEPTED")
         return config.VERIFICATION_STATUS["ACCEPTED"], hash_object, ref_image_ids
     
     # second image...
     for image_id, saved_hash_value in saved_hash_values:
         similarity = get_hash_similarity(hash_value, saved_hash_value)
+        if similarity > highest_similarity:
+            highest_similarity = similarity
+
         if similarity == 1 and await get_image_last_verification_status(image_id) == config.VERIFICATION_STATUS["REJECTED"]:
             print("REJECTED")
             return config.VERIFICATION_STATUS["REJECTED"], hash_object, ref_image_ids
@@ -56,6 +60,7 @@ async def self_verify_image(filepath: str):
             ref_image_ids.append(image_id)
 
     print(f"Ref image IDs: {ref_image_ids}")
+    print(f"Highest similarity: {highest_similarity}")
     if len(ref_image_ids) == 0:
         print("ACCEPTED")
         return config.VERIFICATION_STATUS["ACCEPTED"], hash_object, ref_image_ids

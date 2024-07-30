@@ -44,7 +44,7 @@ async def verify_image(image_id: int, admin_uid: str, result: int):
         if result == config.VERIFICATION_STATUS["ACCEPTED"]:
             # Send email indicating verification passed
             send_email_with_template(pass_template, "http://localhost:3002", user_email, subject, sender_email, sender_password)
-            return {"message": f"Image {original_filename} registered successfully. Please sign the image."}
+            return {"message": f"Image {original_filename} registered successfully."}
         else:
             # Send email indicating verification failed
             send_email_with_template(fail_template, "http://localhost:3002", user_email, subject, sender_email, sender_password)

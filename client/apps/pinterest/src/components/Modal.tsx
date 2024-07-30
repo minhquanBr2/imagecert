@@ -7,7 +7,7 @@ import { checkSize } from '../utils/checkSize';
 import '../styles/modal_styles.css';
 import { toast } from 'react-toastify';
 import { ImageServices } from '../service/image';
-import KeyManager from './KeyManager';
+import keyManagerInstance from './KeyManager';
 import { AUTH_KEY } from '../type/constant';
 import { responsiveArray } from 'antd/es/_util/responsiveObserver';
 
@@ -52,7 +52,7 @@ async function savePin(
   };
 
   console.log('pin_metadata', pin_metadata);
-  const signature = await KeyManager.signImage(userUID, img_file);
+  const signature = await keyManagerInstance.signImage(userUID, img_file);
   console.log('Signature:', signature);  
   ImageServices.uploadImage(img_file, signature).then((response) => {
     console.log(response);

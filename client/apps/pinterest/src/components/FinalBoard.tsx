@@ -9,7 +9,7 @@ import { Header, LoadingIcon, Modal, OpenPin, Pin } from './index.ts';
 import RandomPin from './RandomPin.tsx';
 import { PinDetails } from '../interface/PinData.ts';
 import KeyStore from './KeyStore';
-import KeyManager from './KeyManager';
+import keyManagerInstance from './KeyManager';
 import IndexedDBServices from '../service/indexDB';
 import AuthContext from '../context/AuthContext';
 import PopUpContent from './PopUpContent';
@@ -34,6 +34,7 @@ const FinalBoard: React.FC = () => {
   const { user } = useContext(AuthContext);
   const userUID = user?.uid as string;
 
+
   useEffect(() => {
     console.log("User UID: ", userUID);
     const checkForExistingPrivateKey = async () => {
@@ -56,7 +57,7 @@ const FinalBoard: React.FC = () => {
 
   const handleGenerateNewKeyPair = async () => {
     try {
-      const { publicKey, privateKey } = await KeyManager.generateKeyPair(userUID as string);
+      const { publicKey, privateKey } = await keyManagerInstance.generateKeyPair(userUID as string);
       await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKey);
       await IndexedDBServices.setItem("userPublicKeyStore", userUID as string, publicKey);
       const result = await getCertForPubkey();
@@ -107,11 +108,11 @@ const FinalBoard: React.FC = () => {
     // Process files
     try {
       const privateKey = await privateKeyFile.arrayBuffer();
-      const privateKeyCryptoObject = await KeyManager.importPrivateKey(privateKey);
+      const privateKeyCryptoObject = await keyManagerInstance.importPrivateKey(privateKey);
       await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKey);         // only do this after ZKP challenge
 
       const publicKey = await publicKeyFile.arrayBuffer();
-      const publicKeyCryptoObject = await KeyManager.importPublicKey(publicKey);
+      const publicKeyCryptoObject = await keyManagerInstance.importPublicKey(publicKey);
       await IndexedDBServices.setItem("userPublicKeyStore", userUID as string, publicKey);
       const result = await getCertForPubkey();
       console.log('Result: ', result);
