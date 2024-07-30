@@ -12,3 +12,6 @@ image_server/credential
 
 db/config.py
 db/imagedb.db
+
+cert.pem
+key.pem

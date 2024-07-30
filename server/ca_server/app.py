@@ -6,6 +6,10 @@ from middleware.firebaseConfig import firebaseConfig
 from middleware.encryptDecrypt import EncryptMiddleware, DecryptMiddleware
 from routes import challenge, handshake
 from utils.key import generate_ca_key_pair
+import ssl
+
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+ssl_context.load_cert_chain('../cert.pem', keyfile='../key.pem')
 
 generate_ca_key_pair()
 
