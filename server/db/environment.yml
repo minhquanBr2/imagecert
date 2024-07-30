@@ -8,6 +8,7 @@ dependencies:
   - beautifulsoup4=4.12.3=py310h06a4308_0
   - bzip2=1.0.8=h5eee18b_6
   - ca-certificates=2024.7.2=h06a4308_0
+  - cffi=1.16.0=py310h5eee18b_1
   - click=8.1.7=py310h06a4308_0
   - comm=0.2.1=py310h06a4308_0
   - debugpy=1.6.7=py310h6a678d5_0
@@ -70,7 +71,6 @@ dependencies:
       - cachecontrol==0.14.0
       - cachetools==5.3.3
       - certifi==2024.6.2
-      - cffi==1.16.0
       - charset-normalizer==3.3.2
       - crypto==1.4.1
       - cryptography==42.0.8
