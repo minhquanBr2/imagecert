@@ -20,10 +20,15 @@ def select_image(imageID, attributes: list):
     return results
 
 
-def select_all_hashes():
+def select_all_accepted_hashes():
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
-    query = '''SELECT imageID, value FROM hash'''
+    query = '''
+            SELECT hash.imageID, hash.value
+            FROM hash
+            JOIN verificationStatus on hash.imageID = verificationStatus.imageID
+            WHERE verificationStatus.result = 0 AND hash.hashID >= 54
+            '''
     cursor.execute(query)
     results = cursor.fetchall()
     conn.commit()

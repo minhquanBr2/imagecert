@@ -31,6 +31,8 @@ class FirebaseAuthMiddleware(BaseHTTPMiddleware):
         except:
             return JSONResponse(status_code=401, content={"message": "Authorization token missing"})      
         
+        # firebase_middleware.py
+
         try:
             if request.url.path.startswith("/upload"):
                 decoded_token = auth.verify_id_token(token, appUser)

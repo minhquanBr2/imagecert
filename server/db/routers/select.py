@@ -93,12 +93,13 @@ async def select_image_user_uid(image_id: int):
         raise JSONResponse(status_code=500, content=f"Internal server error: {str(e)}")
 
 
-@router.get("/all_hashes")
-async def select_all_hashes():
-    print("Retrieving all hashes...")
+@router.get("/all_accepted_hashes")
+async def select_all_accepted_hashes():
+    print("Retrieving all accepted hashes...")
     
     try:
-        results = db_select.select_all_hashes()
+        results = db_select.select_all_accepted_hashes()
+        print("hash results: ", results)
         if results == None or results == []:
             return {"message": "No hashes found."}
         return {"message": results}

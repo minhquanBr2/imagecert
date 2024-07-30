@@ -74,8 +74,8 @@ def test_ref():
 
 
 if __name__ == "__main__":
-    test_image()   
-    # test_hash()
+    # test_image()
+    test_hash()
     # test_verification_status()
     # test_key_certi()
     # test_ref()

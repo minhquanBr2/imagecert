@@ -65,7 +65,7 @@ async def save_refs(imageID, refImageIDs):
         if response.status_code != 200:
             print(f"Error saving reference image for image with ID {imageID}.")
         else:
-            print(f"Reference image saved for image with ID {imageID}.")
+            print(f"Image {imageID} references to image {refImageID}.")
 
 
 async def save_uploaded_data_to_db(userUID, originalFilename, filename, temp_filepath, signature, verificationStatus, hash, refImageIDs):
@@ -73,7 +73,7 @@ async def save_uploaded_data_to_db(userUID, originalFilename, filename, temp_fil
     imageID = await save_image(userUID, originalFilename, filename, timestamp, temp_filepath, signature, "dummy_filepath")
     print(f"Image ID: {imageID}")
     await save_hash(imageID, hash)
-    await save_verification_status(imageID, verificationStatus, timestamp)
+    await save_verification_status(imageID, "", verificationStatus, timestamp)
     await save_refs(imageID, refImageIDs)
 
 
