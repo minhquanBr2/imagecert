@@ -10,14 +10,22 @@ from shared import session_keys
 from typing import Callable
 from firebase_admin import auth, exceptions
 from fastapi.responses import JSONResponse
+from firebase_admin import get_app
+
+exclude_paths = [
+    "/docs",
+    "/redoc",
+    "/openapi.json",
+]
+
 
 def get_uid_from_authorization_header(authorization: str):
     if authorization:
         token = authorization.split(" ")[1]
         token = token.split("Bearer ")[-1]
         try:
-            decoded_token = auth.verify_id_token(token)
-            # print('get_uid_from_authorization_header', decoded_token)
+            decoded_token = auth.verify_id_token(token, app=get_app("appUserSDK"))
+            print('get_uid_from_authorization_header', decoded_token)
             return decoded_token.get("uid"), None
         except exceptions.FirebaseError as e:
             if 'Token expired' in str(e):
@@ -30,6 +38,11 @@ def get_uid_from_authorization_header(authorization: str):
 class DecryptMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         print("middleWare Decrypt")
+        # Exclude SwaggerUI and Redoc paths
+        for exclude_path in exclude_paths:
+            if request.url.path.startswith(exclude_path):
+                response = await call_next(request)
+                return response
         if request.method in ["POST", "PUT", "PATCH"]:
             body = await request.body()
             if body:
@@ -62,6 +75,10 @@ class EncryptMiddleware(BaseHTTPMiddleware):
         print("middleWare Encrypt")
         if request.method == "OPTIONS":
             return await call_next(request)
+        for exclude_path in exclude_paths:
+            if request.url.path.startswith(exclude_path):
+                response = await call_next(request)
+                return response
         uid, error = get_uid_from_authorization_header(request.headers.get("Authorization"))
         if error:
             print('EncryptMiddleware', uid, error)
