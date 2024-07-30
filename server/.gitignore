@@ -13,5 +13,8 @@ image_server/credential
 db/config.py
 db/imagedb.db
 
+cert.pem
+key.pem
+
 # test images
 image_server/internal/upload/imagecert_test
