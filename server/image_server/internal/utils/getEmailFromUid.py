@@ -1,4 +1,4 @@
-from firebase_admin import auth
+from firebase_admin import auth, get_app
 import sys
 sys.path.append("..")
 sys.path.append("../..")
@@ -12,7 +12,7 @@ sys.path.append("../../..")
 
 def get_user_email_by_uid(uid: str) -> str:
     try:
-        user = auth.get_user(uid=uid)
+        user = auth.get_user(uid=uid, app=get_app("appAdminSDK"))
         print(f"User: {user.email}")
 
         return user.email

@@ -43,11 +43,11 @@ async def verify_image(image_id: int, admin_uid: str, result: int):
         
         if result == config.VERIFICATION_STATUS["ACCEPTED"]:
             # Send email indicating verification passed
-            send_email_with_template(pass_template, "http://localhost:3002", user_email, subject, sender_email, sender_password)
+            send_email_with_template(pass_template, config.CLIENT_APP_USER, user_email, subject, sender_email, sender_password)
             return {"message": f"Image {original_filename} registered successfully."}
         else:
             # Send email indicating verification failed
-            send_email_with_template(fail_template, "http://localhost:3002", user_email, subject, sender_email, sender_password)
+            send_email_with_template(fail_template, config.MAIL_COMPOSE_URL, user_email, subject, sender_email, sender_password)
             return {"message": f"Image {original_filename} is rejected."}
 
     except Exception as e:
