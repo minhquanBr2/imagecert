@@ -2,7 +2,7 @@ from fastapi import Request, HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from firebase_admin import auth
 from fastapi.responses import JSONResponse
-
+from firebase_admin import get_app
 
 exclude_paths = [
     "/docs",
@@ -20,7 +20,6 @@ class FirebaseAuthMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         # Exclude SwaggerUI and Redoc paths
-        exclude_paths = ["/docs", "/redoc", "/openapi.json"]
         for exclude_path in exclude_paths:
             if request.url.path.startswith(exclude_path):
                 return await call_next(request)
@@ -35,7 +34,7 @@ class FirebaseAuthMiddleware(BaseHTTPMiddleware):
         
         token = token.split("Bearer ")[-1]
         try:
-            decoded_token = auth.verify_id_token(token)
+            decoded_token = auth.verify_id_token(token, app=get_app("appUserSDK"))
             request.state.user = decoded_token
         except Exception as e:
             return JSONResponse(
