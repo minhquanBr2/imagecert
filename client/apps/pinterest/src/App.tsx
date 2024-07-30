@@ -7,7 +7,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import { firestore } from './firebase_setup/firebase';
 import AuthContext from './context/AuthContext';
 import LoginScreen from './pages/Login';
-import { SSLClient } from './service/handShake';
 firestore
 
 const  App = () =>  {
