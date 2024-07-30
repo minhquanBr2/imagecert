@@ -1,4 +1,3 @@
-import firebase_admin
 from firebase_admin import auth
 import sys
 sys.path.append("..")

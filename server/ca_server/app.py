@@ -9,7 +9,7 @@ from utils.key import generate_ca_key_pair
 
 generate_ca_key_pair()
 
-firebase_admin.initialize_app(options=firebaseConfig)
+firebase_admin.initialize_app(options=firebaseConfig, name="appCAServer")
 
 app = FastAPI()
 

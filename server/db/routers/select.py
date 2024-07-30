@@ -9,18 +9,18 @@ router = APIRouter(
 )
 
 
-@router.get("/key_certi/{user_uid}")
-async def select_key_certi(user_uid: str):
-    print(f"Retrieving public key certificate corresponding with user {user_uid}...")
+# @router.get("/key_certi/{user_uid}")
+# async def select_key_certi(user_uid: str):
+#     print(f"Retrieving public key certificate corresponding with user {user_uid}...")
     
-    try:
-        results = db_select.select_key_certi_from_user_uid(user_uid)
-        if results == None:
-            return {"message": "No public key certificate found for this user."}
-        return {"message": results}
+#     try:
+#         results = db_select.select_key_certi_from_user_uid(user_uid)
+#         if results == None:
+#             return {"message": "No public key certificate found for this user."}
+#         return {"message": results}
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 @router.get("/image/original/{image_id}")
