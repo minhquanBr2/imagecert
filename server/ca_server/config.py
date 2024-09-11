@@ -1,0 +1,1 @@
+DB_ENDPOINT_URL = "http://localhost:8003"
