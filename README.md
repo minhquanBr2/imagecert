@@ -4,6 +4,7 @@ An image registration system for images of multiple categories, based on the pri
 ### 1. Deployment
 #### 1a. Server
 - Switch to branch `docker`.
+- `cd server`
 - Create `secrets` directory under `server` and add necessary files.
 - Run `docker compose up --build`
 #### 1b. Client
