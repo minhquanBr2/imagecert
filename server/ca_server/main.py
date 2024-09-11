@@ -2,17 +2,21 @@ from fastapi import FastAPI
 from middleware.verifyToken import FirebaseAuthMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
-from middleware.firebaseConfig import firebaseConfig
 from middleware.encryptDecrypt import EncryptMiddleware, DecryptMiddleware
 from routes import challenge, handshake
 from utils.key import generate_ca_key_pair
 import ssl
 import os
+import json
 from firebase_admin import get_app
 
 
 TLS_KEY_PATH = os.getenv('TLS_KEY_PATH')
 TLS_CERT_PATH = os.getenv('TLS_CERT_PATH')
+FIREBASE_CONFIGS_PATH = os.getenv('FIREBASE_CONFIGS_PATH')
+with open(FIREBASE_CONFIGS_PATH, 'r') as f:
+    config_data = json.load(f)
+firebaseConfigUser = config_data["firebaseConfigUser"]
 
 
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
@@ -27,7 +31,7 @@ try:
     print("Firebase Admin SDK already initialized.")
 except ValueError:
     print("Initializing Firebase Admin SDK...")
-    firebase_admin.initialize_app(options=firebaseConfig, name="appUserSDK")
+    firebase_admin.initialize_app(options=firebaseConfigUser, name="appUserSDK")
     print("Firebase Admin SDK initialized.")
 
 app = FastAPI()

@@ -33,9 +33,11 @@ services:
     volumes:
       - ./data:/data 
     environment:
+      - FIREBASE_CONFIGS_PATH=/run/secrets/firebase_configs
       - TLS_CERT_PATH=/run/secrets/tls_cert_ca_server
       - TLS_KEY_PATH=/run/secrets/tls_key_ca_server
     secrets:
+      - firebase_configs
       - tls_cert_ca_server
       - tls_key_ca_server
 
