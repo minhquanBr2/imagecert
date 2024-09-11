@@ -1,5 +1,0 @@
-subject = "[CA CSERVER - RESULT]"
-sender_email = "dexterjunes123@gmail.com"
-sender_password = "uhlq djve fhsk mflu"
-pass_template = "templates/PassEmail.html"
-fail_template = "templates/FailEmail.html"

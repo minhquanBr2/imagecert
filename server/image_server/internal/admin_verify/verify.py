@@ -1,13 +1,25 @@
 import datetime
 import config
 import requests
+import json
+import os
 import sys
 sys.path.append("..")
 from internal.email_send.sendEmail import send_email_with_template
-from internal.email_send.constant import pass_template, fail_template, subject, sender_email, sender_password
 from internal.utils.getEmailFromUid import get_user_email_by_uid
 from internal.upload.save import save_verification_status
 from internal.utils.getUserUidFromImageID import get_user_uid_from_image_id
+
+
+EMAIL_CONSTANTS_PATH = os.getenv('EMAIL_CONSTANTS_PATH')
+with open(EMAIL_CONSTANTS_PATH, 'r') as f:
+    email_data = json.load(f)
+    pass_template = email_data["pass_template"]
+    fail_template = email_data["fail_template"]
+    subject = email_data["subject"]
+    sender_email = email_data["sender_email"]
+    sender_password = email_data["sender_password"]
+
 
 def get_original_filename(image_id: str):
     url = f"{config.DB_ENDPOINT_URL}/select/image/original/{image_id}"

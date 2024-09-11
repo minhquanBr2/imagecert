@@ -12,11 +12,13 @@ services:
     volumes:
       - ./data:/data 
     environment:
+      - EMAIL_CONSTANTS_PATH=/run/secrets/email_constants
       - FIREBASE_CONFIGS_PATH=/run/secrets/firebase_configs
       - FIREBASE_ADMIN_SDK_PATH=/run/secrets/firebase_admin_sdk
       - TLS_CERT_PATH=/run/secrets/tls_cert_image_server
       - TLS_KEY_PATH=/run/secrets/tls_key_image_server
     secrets:
+      - email_constants
       - firebase_configs
       - firebase_admin_sdk
       - tls_cert_image_server
@@ -57,6 +59,8 @@ services:
 #     driver: local  # Named volume for shared data, managed by Docker
 
 secrets:
+  email_constants:
+    file: ./secrets/email_constants.json
   firebase_configs: 
     file: ./secrets/firebase_configs.json
   firebase_admin_sdk:
