@@ -1,1 +1,1 @@
-DB_ENDPOINT_URL = "http://localhost:8003"
+DB_ENDPOINT_URL = "http://db:8003"

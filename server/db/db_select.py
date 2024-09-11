@@ -160,12 +160,15 @@ def select_all_images():
 
     results = []
     for image in images:
+
         results.append({
             "imageID": image[0],
             "imageURL": os.path.join(config.IMAGE_DISPLAY_URL, f"{image[1]}.webp"),
             "userUID": image[2],
             "timestamp": image[3]
         })
+
+    print(f"First image: {results[0]['imageURL']}")
     return results
 
 

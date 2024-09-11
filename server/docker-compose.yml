@@ -7,8 +7,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8001:8001"  
+    networks:
+      - my_network
     volumes:
-      - shared_data:/data 
+      - ./data:/data 
     environment:
       - FIREBASE_CONFIGS_PATH=/run/secrets/firebase_configs
       - FIREBASE_ADMIN_SDK_PATH=/run/secrets/firebase_admin_sdk
@@ -26,8 +28,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8002:8002"  
+    networks:
+      - my_network
     volumes:
-      - shared_data:/data 
+      - ./data:/data 
     environment:
       - TLS_CERT_PATH=/run/secrets/tls_cert_ca_server
       - TLS_KEY_PATH=/run/secrets/tls_key_ca_server
@@ -41,12 +45,14 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8003:8003"
+    networks:
+      - my_network
     volumes:
-      - shared_data:/data 
+      - ./data:/data 
 
-volumes:
-  shared_data:
-    driver: local  # Named volume for shared data, managed by Docker
+# volumes:
+#   shared_data:
+#     driver: local  # Named volume for shared data, managed by Docker
 
 secrets:
   firebase_configs: 
@@ -61,4 +67,8 @@ secrets:
     file: ./secrets/tls_cert_ca_server.pem
   tls_key_ca_server:
     file: ./secrets/tls_key_ca_server.pem
+
+networks:
+  my_network:
+    driver: bridge
 

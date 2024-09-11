@@ -15,7 +15,7 @@ VERIFICATION_STATUS_FE_BE_MAPPING = {
 }
 
 # DB endpoint
-DB_ENDPOINT_URL = "http://localhost:8003"
+DB_ENDPOINT_URL = "http://db:8003"
 
 # Client app for users
 CLIENT_APP_USER = "https://imageca-5c31b.web.app"
