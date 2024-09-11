@@ -4,9 +4,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import upload, admin_verify
 from middlewares.firebase.firebase_middleware import FirebaseAuthMiddleware
 from firebase_admin import credentials, get_app
-from config import FIREBASE_ADMIN_SDK, PERM_IMAGE_DIR, TLS_CERT, TLS_KEY
+from config import PERM_IMAGE_DIR
 import firebase_admin
 import ssl
+import os
+
+
+# Load environment variables
+FIREBASE_ADMIN_SDK_PATH = os.getenv('FIREBASE_ADMIN_SDK_PATH')
+TLS_KEY_PATH = os.getenv('TLS_KEY_PATH')
+TLS_CERT_PATH = os.getenv('TLS_CERT_PATH')
 
 
 # Initialize Firebase Admin SDK
@@ -15,19 +22,25 @@ try:
     print("Firebase Admin SDK already initialized.")
 except ValueError:
     print("Initializing Firebase Admin SDK...")
-    cred = credentials.Certificate(FIREBASE_ADMIN_SDK)
+    cred = credentials.Certificate(FIREBASE_ADMIN_SDK_PATH)
     firebase_admin.initialize_app(credential=cred, name="appAdminSDK")
     print("Firebase Admin SDK initialized.")
 
 
-# Initialize FastAPI app and mount the images directory
+# Initialize FastAPI app
 app = FastAPI()
+ 
+ 
+# Mount the images directory
+if not os.path.exists(PERM_IMAGE_DIR):
+    os.makedirs(PERM_IMAGE_DIR)
+    print(f"Directory {PERM_IMAGE_DIR} created.")    
 app.mount("/image", StaticFiles(directory=PERM_IMAGE_DIR), name="images")            # Mount the images directory to serve static files
 
 
-# # Initialize SSL context
+# Initialize SSL context
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-ssl_context.load_cert_chain(TLS_CERT, keyfile=TLS_KEY)
+ssl_context.load_cert_chain(TLS_CERT_PATH, keyfile=TLS_KEY_PATH)
 
 
 # Add middlewares
@@ -52,4 +65,4 @@ for router in routers:
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True, ssl_keyfile=TLS_KEY, ssl_certfile=TLS_CERT)
+    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True, ssl_keyfile=TLS_KEY_PATH, ssl_certfile=TLS_CERT_PATH)

@@ -7,13 +7,16 @@ from middleware.encryptDecrypt import EncryptMiddleware, DecryptMiddleware
 from routes import challenge, handshake
 from utils.key import generate_ca_key_pair
 import ssl
+import os
 from firebase_admin import get_app
 
-TLS_KEY = '/home/khang/imagecert/server/key.pem'
-TLS_CERT = '/home/khang/imagecert/server/cert.pem'
+
+TLS_KEY_PATH = os.getenv('TLS_KEY_PATH')
+TLS_CERT_PATH = os.getenv('TLS_CERT_PATH')
+
 
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-ssl_context.load_cert_chain(TLS_CERT, keyfile=TLS_KEY)
+ssl_context.load_cert_chain(TLS_CERT_PATH, keyfile=TLS_KEY_PATH)
 
 generate_ca_key_pair()
 
@@ -58,4 +61,4 @@ for router in routers:
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=8002, reload=True, ssl_keyfile=TLS_KEY, ssl_certfile=TLS_CERT)
+    uvicorn.run("main:app", host="0.0.0.0", port=8002, reload=True, ssl_keyfile=TLS_KEY_PATH, ssl_certfile=TLS_CERT_PATH)

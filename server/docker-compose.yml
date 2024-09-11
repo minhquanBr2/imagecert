@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  image_server:
+    build:
+      context: ./image_server
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"  
+    volumes:
+      - shared_data:/data 
+    environment:
+      - FIREBASE_CONFIGS_PATH=/run/secrets/firebase_configs
+      - FIREBASE_ADMIN_SDK_PATH=/run/secrets/firebase_admin_sdk
+      - TLS_CERT_PATH=/run/secrets/tls_cert_image_server
+      - TLS_KEY_PATH=/run/secrets/tls_key_image_server
+    secrets:
+      - firebase_configs
+      - firebase_admin_sdk
+      - tls_cert_image_server
+      - tls_key_image_server
+
+  ca_server:
+    build:
+      context: ./ca_server
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"  
+    volumes:
+      - shared_data:/data 
+    environment:
+      - TLS_CERT_PATH=/run/secrets/tls_cert_ca_server
+      - TLS_KEY_PATH=/run/secrets/tls_key_ca_server
+    secrets:
+      - tls_cert_ca_server
+      - tls_key_ca_server
+
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8003"
+    volumes:
+      - shared_data:/data 
+
+volumes:
+  shared_data:
+    driver: local  # Named volume for shared data, managed by Docker
+
+secrets:
+  firebase_configs: 
+    file: ./secrets/firebase_configs.json
+  firebase_admin_sdk:
+    file: ./secrets/firebase_admin_sdk.json
+  tls_cert_image_server:
+    file: ./secrets/tls_cert_image_server.pem
+  tls_key_image_server:
+    file: ./secrets/tls_key_image_server.pem
+  tls_cert_ca_server:
+    file: ./secrets/tls_cert_ca_server.pem
+  tls_key_ca_server:
+    file: ./secrets/tls_key_ca_server.pem
+

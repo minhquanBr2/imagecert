@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from db import db_select
+import db_select
 
 
 router = APIRouter(
