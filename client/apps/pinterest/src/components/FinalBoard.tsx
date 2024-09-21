@@ -59,30 +59,36 @@ const FinalBoard: React.FC = () => {
       const { publicKey, privateKey } = await keyManagerInstance.generateKeyPair(userUID as string);
       await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKey);
       await IndexedDBServices.setItem("userPublicKeyStore", userUID as string, publicKey);
+      const toastId = toast.loading("Generating key pair...");
       const result = await getCertForPubkey();
       console.log('Result: ', result);
       if (result){
-        toast.success("Key pair uploaded successfully!");
+        toast.update(toastId, {render: "Key pair uploaded successfully!", type: 'success', autoClose: 1000, isLoading: false});
         setShowGenerateKeyPopUp(false);
+        return true;
       }
       else {
         await IndexedDBServices.removeItem("userPrivateKeyStore", userUID as string);
         await IndexedDBServices.removeItem("userPublicKeyStore", userUID as string);
-        toast.error("Key pair upload failed!");
+        toast.update(toastId, {render: "Key pair upload failed!", type: 'error', autoClose: 1000, isLoading: false});
+        return false;
       }
 
     } catch (error) {
       console.error('Error generating or storing new key pair:', error);
+      return false;
     }
   };
 
 
   const handleUploadKeyPair = async (event: any) => {
+    console.log('Event: ', event);
     const files = event.target.files;
 
     // Check if the user uploaded exactly 2 files
     if (files.length !== 2){
       alert("Please upload exactly 2 files: public key file (*.pub) and private key file (without extension).");
+      return false;
     }
 
     // Identify the files by their names
@@ -95,37 +101,41 @@ const FinalBoard: React.FC = () => {
         privateKeyFile = files[i];
       }
     }
-    console.log('Public key file: ', publicKeyFile);
-    console.log('Private key file: ', privateKeyFile);
+    // console.log('Public key file: ', publicKeyFile);
+    // console.log('Private key file: ', privateKeyFile);
 
     // Ensure both public and private key files are identified
     if (!publicKeyFile || !privateKeyFile) {
       alert("Please upload a valid public key file (*.pub) and a private key file (without extension).");
-      return;
+      return false;
     }
 
     // Process files
     try {
       const privateKey = await privateKeyFile.arrayBuffer();
       const privateKeyCryptoObject = await keyManagerInstance.importPrivateKey(privateKey);
-      await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKey);         // only do this after ZKP challenge
-
+      const res = await IndexedDBServices.setItem("userPrivateKeyStore", userUID as string, privateKey);         // only do this after ZKP challenge
+      // console.log('Private key stored in IndexedDB: ', res);
       const publicKey = await publicKeyFile.arrayBuffer();
       const publicKeyCryptoObject = await keyManagerInstance.importPublicKey(publicKey);
       await IndexedDBServices.setItem("userPublicKeyStore", userUID as string, publicKey);
+      const toastId = toast.loading("Uploading key pair...");
       const result = await getCertForPubkey();
-      console.log('Result: ', result);
+      // console.log('Result: ', result);
       if (result){
-        toast.success("Key pair uploaded successfully!");
+        toast.update(toastId, {render: "Key pair uploaded successfully!", type: 'success', autoClose: 1000, isLoading: false});
         setShowGenerateKeyPopUp(false);
+        return true;
       }
       else {        
         await IndexedDBServices.removeItem("userPrivateKeyStore", userUID as string);
         await IndexedDBServices.removeItem("userPublicKeyStore", userUID as string);
-        toast.error("Key pair upload failed: Old key pair detected!");
+        toast.update(toastId, {render: "Key pair upload failed: Old key pair detected!", type: 'error', autoClose: 1000, isLoading: false});
+        return false;
       }
     } catch (error) {
       console.error('Error uploading key pair:', error);
+      return false;
     }
   };
 
@@ -133,7 +143,10 @@ const FinalBoard: React.FC = () => {
   const fetchPins = async () => {
     let pinsArray: any[] = [];
     const firebaseData = await ImageServices.getAll();
-    console.log('Firebase data: ', firebaseData);
+    if (!firebaseData) {
+      console.error('Error fetching pins from Firebase');
+      return;
+    }
     firebaseData.map((pin: any) => {
       pinsArray.push(
         <Pin

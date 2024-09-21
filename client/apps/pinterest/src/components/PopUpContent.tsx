@@ -2,8 +2,8 @@ import React, { useRef, useEffect} from "react";
 
 type ModalProps = {
   close: () => void;
-  handleGenerateNewKeyPair: () => void;
-  handleUploadKeyPair: (event: any) => void;
+  handleGenerateNewKeyPair: () => Promise<boolean>;
+  handleUploadKeyPair: (event: any) => Promise<boolean>;
 };
 
 const PopUpContent: React.FC<ModalProps> = ({ close, handleGenerateNewKeyPair, handleUploadKeyPair }) => {
@@ -22,6 +22,7 @@ const PopUpContent: React.FC<ModalProps> = ({ close, handleGenerateNewKeyPair, h
     };
   }, []);
 
+
   return (
     <div className="modal" ref={contentRef}>
       {/* <a className="close" onClick={close}>
@@ -36,10 +37,19 @@ const PopUpContent: React.FC<ModalProps> = ({ close, handleGenerateNewKeyPair, h
 
       <div className="actions">   
         <div>
-          <button style={{ border: "2px solid #000", background:"white", padding:"5px 10px", margin: "0px 5px", fontSize: "14px"}} onClick={() => handleGenerateNewKeyPair()} > Generate new key pair </button>
+          <button style={{ border: "2px solid #000", background:"white", padding:"5px 10px", margin: "0px 5px", fontSize: "14px"}} onClick={async () => await handleGenerateNewKeyPair()} > Generate new key pair </button>
         </div>    
         <div style={{position: "relative", display: "inline-block" }}>
-          <input multiple id="filePicker" style={{visibility:"hidden" }} type={"file"} onChange={(event) => handleUploadKeyPair(event)}></input>
+            <input
+              multiple
+              id="filePicker"
+              style={{ visibility: "hidden" }}
+              type="file"
+              onChange={async (event) => {
+                await handleUploadKeyPair(event);
+                (event.target as HTMLInputElement).value = "";                
+              }}
+            />
           <label htmlFor="filePicker" style={{ border: "2px solid #000", background:"white", padding:"5px 10px", margin: "0px 5px", fontSize: "14px", top: "50%", left: "50%", transform: "translate(-50%, -50%)", position: "absolute",  display: "flex", alignItems: "center", justifyContent: "center"}}> Upload private key file </label>
         </div>
       </div>  

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { AUTH_KEY } from '../type/constant';
 
-const API_BASE_URL = 'https://104.154.115.168:8001/admin_verify';
+const API_BASE_URL = 'https://imagecert-ca-server.selab.edu.vn/admin_verify';
 
 const admin_http = axios.create({
   baseURL: API_BASE_URL,
