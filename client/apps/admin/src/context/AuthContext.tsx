@@ -29,7 +29,7 @@ export class AuthProvider extends Component<Props, State> {
 	}
 
 	logIn = (user: AuthT) => {
-    console.log('user: ', user)
+    // console.log('user: ', user)
 		this.setState({
 			user: user,
 		})

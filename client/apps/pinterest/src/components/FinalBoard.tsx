@@ -82,7 +82,6 @@ const FinalBoard: React.FC = () => {
 
 
   const handleUploadKeyPair = async (event: any) => {
-    console.log('Event: ', event);
     const files = event.target.files;
 
     // Check if the user uploaded exactly 2 files
@@ -227,7 +226,6 @@ const FinalBoard: React.FC = () => {
       <div 
        onClick={(event) => {
         const target = event.target as HTMLElement;
-        console.log('target: ', target);
         if (target.className === 'open_pin_modal_container') {
           setShowOpenPin(false);
         }

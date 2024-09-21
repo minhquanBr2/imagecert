@@ -15,7 +15,6 @@ const LoginScreen: React.FC = () => {
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const user = result.user;
       const token = await user.getIdToken();
-      console.log('user', token, credential);
   
       const authData = {
         displayName: user?.displayName || '',
