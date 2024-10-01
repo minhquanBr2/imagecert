@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { AUTH_KEY } from '../type/constant';
+import { API_URL, AUTH_KEY } from '../type/constant';
 
-const API_BASE_URL = 'https://104.154.115.168:8001/admin_verify';
+
 
 const admin_http = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_URL,
 });
 
 const prepareHeader = (config : any) => {
@@ -37,11 +37,11 @@ admin_http.interceptors.response.use(
     return response;
   },
   error => {
-    console.error('API Error:', error, error.response.status, error.response.data.message);
+    console.error('API Error:', error);
     if (error.response.status === 401 && error.response.data.includes('expired')) {
       console.error('Token expired');
-      sessionStorage.removeItem(AUTH_KEY);
-      window.location.reload();
+      // sessionStorage.removeItem(AUTH_KEY);
+      // window.location.reload();
     }
     return Promise.reject(error);
   }
@@ -50,8 +50,12 @@ admin_http.interceptors.response.use(
 
 
 export const getPendingImages = async () => {
-  const response = await admin_http.get(`${API_BASE_URL}/get_pendings`);
-  return response.data;
+  const response = await admin_http.get(`${API_URL}/admin_verify/get_pendings`);
+  if (response.status !== 200 || response.data === null) {
+    console.error('Error:', response);
+    return [];
+  }
+  return response.data.data;
 };
 
 export const verifyImage = async (image_id: number, admin_uid: string, result: number) => {
@@ -61,10 +65,14 @@ export const verifyImage = async (image_id: number, admin_uid: string, result: n
     result,
   };
   console.log(payload);
-  await admin_http.post(`${API_BASE_URL}/verify`, payload);
+  await admin_http.post(`${API_URL}/admin_verify/verify`, payload);
 };
 
 export const getHistory = async (userUID: string) => {
-  const response = await admin_http.get(`${API_BASE_URL}/verification_history/${userUID}`);
-  return response.data;
+  const response = await admin_http.get(`${API_URL}/admin_verify/verification_history/${userUID}`);
+  if (response.status !== 200 || response.data === null) {
+    console.error('Error:', response);
+    return [];
+  }
+  return response.data.data;
 }
