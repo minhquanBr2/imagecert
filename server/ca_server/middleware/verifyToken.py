@@ -34,7 +34,7 @@ class FirebaseAuthMiddleware(BaseHTTPMiddleware):
         
         token = token.split("Bearer ")[-1]
         try:
-            decoded_token = auth.verify_id_token(token, app=get_app("appUserSDK"))
+            decoded_token = auth.verify_id_token(token, app=get_app("appUser"))
             request.state.user = decoded_token
         except Exception as e:
             return JSONResponse(

@@ -72,7 +72,7 @@ async def select_all_images():
     try:
         results = db_select.select_all_images()
         if results == None or results == []:
-            return {"message": "No images found."}
+            return {"message": []}
         return {"message": results}
 
     except Exception as e:

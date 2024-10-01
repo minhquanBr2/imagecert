@@ -8,13 +8,11 @@ WORKDIR /app
 
 COPY requirements.txt /app
 
-RUN pip install --upgrade pip setuptools wheel
+# RUN pip install --upgrade pip setuptools wheel
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app
 
 EXPOSE 8003
 
-CMD ["python", "db_create.py"]
-
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8003"]
+CMD ["sh", "-c", "python db_create.py && python db_connect.py && uvicorn main:app --host 0.0.0.0 --port 8003"]

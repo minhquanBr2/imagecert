@@ -37,6 +37,18 @@ def select_all_accepted_hashes():
 
 
 async def select_all_key_certis_from_user_uid(user_uid):
+    
+    # print all tables
+    conn = sqlite3.connect(config.IMAGEDB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = cursor.fetchall()
+    print(f"Tables: {tables}")
+    for table in tables:
+        print(table[0])
+    conn.commit()
+    conn.close()
+
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     query = f'''SELECT * FROM keyCerti WHERE userUID = '{user_uid}' ORDER BY certiID DESC'''
@@ -168,7 +180,8 @@ def select_all_images():
             "timestamp": image[3]
         })
 
-    print(f"First image: {results[0]['imageURL']}")
+    if len(results) >= 1:
+        print(f"First image: {results[0]['imageURL']}")
     return results
 
 

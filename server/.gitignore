@@ -17,3 +17,5 @@ key.pem
 
 # test images
 image_server/internal/upload/imagecert_test
+
+secrets

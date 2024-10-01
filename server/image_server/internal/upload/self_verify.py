@@ -35,12 +35,11 @@ async def self_verify_image(filepath: str):
     hash_value = hash_object["value"]
     saved_hash_values = await get_all_accepted_hash_values()
     highest_similarity = 0.0
-    print(f"{len(saved_hash_values)} hash values retrieved from database.")
     ref_image_ids = []
 
     # first image
-    if saved_hash_values is None:
-        print("newly ACCEPTED")
+    if saved_hash_values is None or len(saved_hash_values) == 0:
+        print("NEWLY ACCEPTED")
         return config.VERIFICATION_STATUS["ACCEPTED"], hash_object, ref_image_ids
     
     # second image...

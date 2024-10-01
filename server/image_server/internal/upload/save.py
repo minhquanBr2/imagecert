@@ -90,6 +90,10 @@ def save_temp_image(file):
     original_filename = file.filename
     extension = original_filename.split(".")[-1]
     filename = generate_image_name()
+
+    if not os.path.exists(config.TEMP_IMAGE_DIR):
+        os.makedirs(config.TEMP_IMAGE_DIR)
+
     temp_filepath = os.path.join(config.TEMP_IMAGE_DIR, f"{filename}.{extension}")
 
     with open(temp_filepath, "wb") as buffer:

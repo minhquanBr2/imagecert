@@ -39,6 +39,7 @@ async def insert_verification_status(imageID, adminUID, result, verificationTime
 
 
 async def insert_key_certi(userUID, certi, issuerName, notBefore, notAfter, status, publicKey):
+    print(f"Inserting key certi to {config.IMAGEDB_PATH}...")
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     cursor.execute('''

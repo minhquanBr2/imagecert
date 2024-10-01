@@ -24,7 +24,7 @@ def get_uid_from_authorization_header(authorization: str):
         token = authorization.split(" ")[1]
         token = token.split("Bearer ")[-1]
         try:
-            decoded_token = auth.verify_id_token(token, app=get_app("appUserSDK"))
+            decoded_token = auth.verify_id_token(token, app=get_app("appUser"))
             print('get_uid_from_authorization_header', decoded_token)
             return decoded_token.get("uid"), None
         except exceptions.FirebaseError as e:

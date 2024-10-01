@@ -132,3 +132,13 @@ if __name__ == "__main__":
     create_table_image_certi()
     create_table_key_certi()
     create_table_ref()
+
+    # print all tables
+    conn = db_connect.connect_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = cursor.fetchall()
+    for table in tables:
+        print(table[0])
+    conn.commit()
+    conn.close()

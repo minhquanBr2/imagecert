@@ -41,7 +41,7 @@ def load_ca_private_key():
         return private_key
     else:
         generate_ca_key_pair()
-        raise FileNotFoundError("CA private key file not found.")
+        load_ca_private_key()
 
 def load_ca_public_key():
     if os.path.exists('ca_public_key.pem'):
@@ -58,3 +58,7 @@ def load_ca_public_key():
 def store_session_key(session_id: str, encrypted_session_key: str):
     # Store encrypted session key with session ID
     session_keys[session_id] = base64.b64decode(encrypted_session_key.encode())
+
+
+if __name__ == "__main__":
+    generate_ca_key_pair()

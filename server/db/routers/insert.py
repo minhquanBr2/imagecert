@@ -76,6 +76,7 @@ async def insert_key_certi(request: RequestUploadPublicKeyCerti):
     public_key = request.public_key
     
     try:
+        print(f"user_uid: {user_uid}")
         all_key_certis = await db_select.select_all_key_certis_from_user_uid(user_uid)
         curr_key_certi = {}
         # check if the new certi existed:

@@ -8,23 +8,58 @@ from config import PERM_IMAGE_DIR
 import firebase_admin
 import ssl
 import os
+import json
 
 
 # Load environment variables
-FIREBASE_ADMIN_SDK_PATH = os.getenv('FIREBASE_ADMIN_SDK_PATH')
-TLS_KEY_PATH = os.getenv('TLS_KEY_PATH')
-TLS_CERT_PATH = os.getenv('TLS_CERT_PATH')
+# TLS_KEY_PATH = os.getenv('TLS_KEY_PATH')
+# TLS_CERT_PATH = os.getenv('TLS_CERT_PATH')
+# FIREBASE_CONFIGS_PATH = os.getenv('FIREBASE_CONFIGS_PATH')
+# with open(FIREBASE_CONFIGS_PATH, 'r') as f:
+#     config_data = json.load(f)
+# firebaseConfigUser = config_data["firebaseConfigUser"]
 
 
-# Initialize Firebase Admin SDK
+CRED_USER_PATH = os.getenv('CRED_USER_PATH')
+CRED_ADMIN_PATH = os.getenv('CRED_ADMIN_PATH')
+
+# appUserSDK
 try:
+    credUser = credentials.Certificate(CRED_USER_PATH)
+    firebase_admin.initialize_app(credUser, name="appUserSDK")
+    appUserSDK = get_app("appUserSDK")
+    print("appUserSDK initialized successfully.")
+except ValueError as e:
+    appUserSDK = get_app("appUserSDK")  # App is already initialized
+    print("appUserSDK is already initialized.")
+except Exception as e:
+    print(f"Error initializing appUserSDK: {e}")
+
+
+# appAdminSDK
+try:
+    credAdmin = credentials.Certificate(CRED_ADMIN_PATH)
+    firebase_admin.initialize_app(credUser, name="appAdminSDK")
     appAdminSDK = get_app("appAdminSDK")
-    print("Firebase Admin SDK already initialized.")
-except ValueError:
-    print("Initializing Firebase Admin SDK...")
-    cred = credentials.Certificate(FIREBASE_ADMIN_SDK_PATH)
-    firebase_admin.initialize_app(credential=cred, name="appAdminSDK")
-    print("Firebase Admin SDK initialized.")
+    print("appAdminSDK initialized successfully.")
+except ValueError as e:
+    appAdminSDK = get_app("appAdminSDK")  # App is already initialized
+    print("appAdminSDK is already initialized.")
+except Exception as e:
+    print(f"Error initializing appAdminSDK: {e}")
+
+
+# try:
+#     print(f"firebaseConfigUser: {firebaseConfigUser}")
+#     appUser = get_app("appUser")
+#     print("App User is already initialized.")
+# except ValueError:
+#     try:
+#         firebase_admin.initialize_app(options=firebaseConfigUser, name="appUser")
+#         appUser = get_app("appUser")
+#         print("App User initialized successfully.")
+#     except Exception as e:
+#         print(f"Error initializing App User: {e}")
 
 
 # Initialize FastAPI app
@@ -38,9 +73,9 @@ if not os.path.exists(PERM_IMAGE_DIR):
 app.mount("/image", StaticFiles(directory=PERM_IMAGE_DIR), name="images")            # Mount the images directory to serve static files
 
 
-# Initialize SSL context
-ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-ssl_context.load_cert_chain(TLS_CERT_PATH, keyfile=TLS_KEY_PATH)
+# # Initialize SSL context
+# ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+# ssl_context.load_cert_chain(TLS_CERT_PATH, keyfile=TLS_KEY_PATH)
 
 
 # Add middlewares
@@ -65,4 +100,4 @@ for router in routers:
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True, ssl_keyfile=TLS_KEY_PATH, ssl_certfile=TLS_CERT_PATH)
+    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)

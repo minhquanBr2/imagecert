@@ -1,8 +1,7 @@
 from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-from middlewares.firebase.firebase_init import appUser, appAdmin
-from firebase_admin import auth
+from firebase_admin import auth, get_app
 
 
 exclude_paths = [
@@ -28,18 +27,27 @@ class FirebaseAuthMiddleware(BaseHTTPMiddleware):
         try:
             token = request.headers.get("authorization").split("Bearer ")[-1]
             print(f"Token: {token[:10]}...{token[-10:]}")
+            print("aaa")
         except:
             return JSONResponse(status_code=401, content={"message": "Authorization token missing"})      
         
         # firebase_middleware.py
 
         try:
+            print("Processing request...")
+            print(request)
+            print(request.url)
+            print(request.url.path)
             if request.url.path.startswith("/upload"):
-                decoded_token = auth.verify_id_token(token, appUser)
+                print(f"Authorization request from user.", auth)
+                decoded_token = auth.verify_id_token(token, app=get_app("appUserSDK"))
+                print("decode: ", decoded_token)
             else:
-                decoded_token = auth.verify_id_token(token, appAdmin)
+                print(f"Authorization request from admin.")
+                decoded_token = auth.verify_id_token(token, app=get_app("appAdminSDK"))
             request.state.user = decoded_token
         except Exception as e:
+
             return JSONResponse(status_code=401, content=f"Invalid or expired token: {str(e)}")
 
         response = await call_next(request)

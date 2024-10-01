@@ -100,8 +100,13 @@ async def get_all_accepted_hash_values():
     url = f"{config.DB_ENDPOINT_URL}/select/all_accepted_hashes"
     response = requests.get(url)
     if response.status_code == 200:
-        return response.json()["message"]
-    return None
+        result = response.json()["message"]
+        if isinstance(result, str):
+            print('str')
+            return None
+        return result
+    else:
+        return None
 
 
 async def get_image_last_verification_status(image_id):
