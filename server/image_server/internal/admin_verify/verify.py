@@ -8,7 +8,7 @@ sys.path.append("..")
 from internal.email_send.sendEmail import send_email_with_template
 from internal.utils.getEmailFromUid import get_user_email_by_uid
 from internal.upload.save import save_verification_status
-from internal.utils.getUserUidFromImageID import get_user_uid_from_image_id
+from fastapi.responses import JSONResponse
 
 
 EMAIL_CONSTANTS_PATH = os.getenv('EMAIL_CONSTANTS_PATH')
@@ -21,48 +21,55 @@ with open(EMAIL_CONSTANTS_PATH, 'r') as f:
     sender_password = email_data["sender_password"]
 
 
-def get_original_filename(image_id: str):
+async def get_original_filename(image_id: str):
     url = f"{config.DB_ENDPOINT_URL}/select/image/original/{image_id}"
     response = requests.get(url)
-    if response.status_code != 200:
-        return None
+    if response.status_code == 200:
+        result = response.json()['result']
+        return result[0][0]
+    return None
 
-    results = response.json()["message"]
-    if len(results) == 0:
-        return None
-
-    return results[0][0]
+async def get_user_uid_from_image_id(image_id: str):
+    url = f"{config.DB_ENDPOINT_URL}/select/image/{image_id}/user_uid"
+    response = requests.get(url)
+    if response.status_code == 200:
+        result = response.json()['result']
+        return result
+    return None
 
 async def verify_image(image_id: int, admin_uid: str, result: int):
     try:
-        original_filename = get_original_filename(image_id)
+        original_filename = await get_original_filename(image_id)
+        print(f"Original filename: {original_filename}")
         if original_filename is None:
-            raise ValueError(f"Image {image_id} not found.")
+            return 500, {"message": f"Image {image_id} not found."}
 
         user_uid = await get_user_uid_from_image_id(image_id)
         print(f"User UID: {user_uid}")
         if user_uid is None:
-            raise ValueError(f"User UID not found for image {image_id}.")
+            return 500, {"message": f"Image {image_id} not found."}
 
         user_email = get_user_email_by_uid(user_uid)
-        if user_email == 'x':
-            raise ValueError(f"User email not found for user {user_uid}.")
+        print(f"User email: {user_email}")
+        if user_email == '' or user_email == None:
+            return 500, {"message": f"User email not found for user {user_uid}."}
 
         timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
-        response = await save_verification_status(image_id,admin_uid, result, timestamp)
+        response = await save_verification_status(image_id, admin_uid, result, timestamp)
+        print(f"Verification timestamp at admin: {timestamp}")
         if response.status_code != 200:
-            raise RuntimeError(f"Error saving verification status for image {image_id}.")
+            return 500, {"message": f"Error saving verification status for image {image_id}."}
         
         if result == config.VERIFICATION_STATUS["ACCEPTED"]:
             # Send email indicating verification passed
             send_email_with_template(pass_template, config.CLIENT_APP_USER, user_email, subject, sender_email, sender_password)
-            return {"message": f"Image {original_filename} registered successfully."}
+            return 200, {"message": f"Image {original_filename} registered successfully."}
         else:
             # Send email indicating verification failed
             send_email_with_template(fail_template, config.MAIL_COMPOSE_URL, user_email, subject, sender_email, sender_password)
-            return {"message": f"Image {original_filename} is rejected."}
+            return 200, {"message": f"Image {original_filename} is rejected."}
 
     except Exception as e:
         print(f"Error verifying image: {str(e)}")
-        return {"message": f"Error verifying image: {str(e)}"}
+        return 500, {"message": f"Error verifying image: {str(e)}"}
 

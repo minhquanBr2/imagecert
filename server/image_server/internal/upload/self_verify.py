@@ -3,7 +3,7 @@ from internal.upload.hash import HashManager, get_all_accepted_hash_values, get_
 
 
 HIGH_THRESHOLD = 0.95
-LOW_THRESHOLD = 0.7
+LOW_THRESHOLD = 0.6
 
 
 def hex_to_int(hex_str):
@@ -34,6 +34,7 @@ async def self_verify_image(filepath: str):
     hash_object = HashManager().get_hash_generator('pHash').compute_hash(filepath)
     hash_value = hash_object["value"]
     saved_hash_values = await get_all_accepted_hash_values()
+    print(f"Saved hash values: {saved_hash_values}")
     highest_similarity = 0.0
     ref_image_ids = []
 
@@ -43,7 +44,9 @@ async def self_verify_image(filepath: str):
         return config.VERIFICATION_STATUS["ACCEPTED"], hash_object, ref_image_ids
     
     # second image...
-    for image_id, saved_hash_value in saved_hash_values:
+    for record in saved_hash_values:
+        image_id = record[0]
+        saved_hash_value = record[1]
         similarity = get_hash_similarity(hash_value, saved_hash_value)
         if similarity > highest_similarity:
             highest_similarity = similarity

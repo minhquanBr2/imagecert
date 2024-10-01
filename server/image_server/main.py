@@ -12,14 +12,6 @@ import json
 
 
 # Load environment variables
-# TLS_KEY_PATH = os.getenv('TLS_KEY_PATH')
-# TLS_CERT_PATH = os.getenv('TLS_CERT_PATH')
-# FIREBASE_CONFIGS_PATH = os.getenv('FIREBASE_CONFIGS_PATH')
-# with open(FIREBASE_CONFIGS_PATH, 'r') as f:
-#     config_data = json.load(f)
-# firebaseConfigUser = config_data["firebaseConfigUser"]
-
-
 CRED_USER_PATH = os.getenv('CRED_USER_PATH')
 CRED_ADMIN_PATH = os.getenv('CRED_ADMIN_PATH')
 
@@ -35,31 +27,18 @@ except ValueError as e:
 except Exception as e:
     print(f"Error initializing appUserSDK: {e}")
 
-
 # appAdminSDK
 try:
     credAdmin = credentials.Certificate(CRED_ADMIN_PATH)
-    firebase_admin.initialize_app(credUser, name="appAdminSDK")
+    firebase_admin.initialize_app(credAdmin, name="appAdminSDK")
     appAdminSDK = get_app("appAdminSDK")
     print("appAdminSDK initialized successfully.")
 except ValueError as e:
-    appAdminSDK = get_app("appAdminSDK")  # App is already initialized
-    print("appAdminSDK is already initialized.")
-except Exception as e:
-    print(f"Error initializing appAdminSDK: {e}")
-
-
-# try:
-#     print(f"firebaseConfigUser: {firebaseConfigUser}")
-#     appUser = get_app("appUser")
-#     print("App User is already initialized.")
-# except ValueError:
-#     try:
-#         firebase_admin.initialize_app(options=firebaseConfigUser, name="appUser")
-#         appUser = get_app("appUser")
-#         print("App User initialized successfully.")
-#     except Exception as e:
-#         print(f"Error initializing App User: {e}")
+    try:
+        appAdminSDK = get_app("appAdminSDK")  
+        print("appAdminSDK is already initialized.")
+    except Exception as e:
+        print(f"Error initializing appAdminSDK: {e}")
 
 
 # Initialize FastAPI app

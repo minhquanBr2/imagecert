@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException, Request, Depends
+from fastapi.responses import JSONResponse
 from internal.admin_verify import display, verify
+from internal.utils import getEmailFromUid, getUserUidFromImageID
 from schemas.request_schemas import RequestVerifyImage
 import config
-from internal.utils import getEmailFromUid, getUserUidFromImageID
-from fastapi.responses import JSONResponse
+import requests
 
 router = APIRouter(
     prefix = '/admin_verify',
@@ -13,15 +14,15 @@ router = APIRouter(
 
 @router.get("/get_pendings")
 async def get_pending_images():
-    results = await display.get_pending_images()
-    return results
-
+    url = f"{config.DB_ENDPOINT_URL}/select/pending_images"
+    response = requests.get(url)
+    return JSONResponse(status_code=response.status_code, content=response.json())
 
 
 @router.get("/verification_history/{admin_uid}")
 async def get_verification_history(admin_uid: str):
-    results = await display.get_verification_history(admin_uid)
-    return results
+    response = await display.get_verification_history(admin_uid)
+    return JSONResponse(status_code=response.status_code, content=response.json())
 
 
 @router.post("/verify")
@@ -32,16 +33,13 @@ async def verify_image(request: RequestVerifyImage):
         admin_uid = request.admin_uid
         result = config.VERIFICATION_STATUS_FE_BE_MAPPING[request.result]
         print(f"Verification request received from admin {admin_uid}.")
-        response = await verify.verify_image(image_id, admin_uid, result)
-        print('response:', response)
-        if "Error" in response.get("message", ""):
-            raise RuntimeError(response["message"])
-        return JSONResponse(content=response, status_code=200)
+        status_code, data = await verify.verify_image(image_id, admin_uid, result)
+        return JSONResponse(status_code=status_code, content=data)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        return JSONResponse(status_code=500, content={"message": f"Internal server error: {str(e)}"})
 
 
 @router.get("/email/{user_uid}")
 async def get_email_by_user_uid(user_uid: str):
-    results = getEmailFromUid.get_user_email_by_uid(user_uid)
-    return results
+    data = getEmailFromUid.get_user_email_by_uid(user_uid)
+    return JSONResponse(status_code=200, content=data)

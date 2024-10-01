@@ -9,7 +9,7 @@ def standardize_timestamp(timestamp):
     return f"{timestamp[:4]}-{timestamp[4:6]}-{timestamp[6:8]} {timestamp[8:10]}:{timestamp[10:12]}:{timestamp[12:14]}.{timestamp[14:]}"
 
 
-def select_image(imageID, attributes: list):
+def select_image(imageID, attributes: list) -> list:
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     query = f'''SELECT {','.join(attributes)} FROM image WHERE imageID = {imageID}'''
@@ -20,14 +20,14 @@ def select_image(imageID, attributes: list):
     return results
 
 
-def select_all_accepted_hashes():
+def select_all_accepted_hashes() -> list:
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     query = '''
             SELECT hash.imageID, hash.value
             FROM hash
             JOIN verificationStatus on hash.imageID = verificationStatus.imageID
-            WHERE verificationStatus.result = 0 AND hash.hashID >= 54
+            WHERE verificationStatus.result = 0
             '''
     cursor.execute(query)
     results = cursor.fetchall()
@@ -36,7 +36,7 @@ def select_all_accepted_hashes():
     return results
 
 
-async def select_all_key_certis_from_user_uid(user_uid):
+async def select_all_key_certis_from_user_uid(user_uid) -> list:
     
     # print all tables
     conn = sqlite3.connect(config.IMAGEDB_PATH)
@@ -99,7 +99,7 @@ async def select_all_key_certis_from_user_uid(user_uid):
 #         }
 
 
-def select_verification_history(admin_uid):
+def select_verification_history(admin_uid) -> list:
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     query = f'''
@@ -124,7 +124,7 @@ def select_verification_history(admin_uid):
     return results
 
 
-def select_pending_images():
+def select_pending_images() -> list:
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     query = '''
@@ -155,7 +155,7 @@ def select_pending_images():
     return results
 
 
-def select_all_images():
+def select_all_images() -> list:
     conn = sqlite3.connect(config.IMAGEDB_PATH)
     cursor = conn.cursor()
     query = '''
@@ -171,8 +171,8 @@ def select_all_images():
     conn.close()
 
     results = []
+    print(f"Images: {images}")
     for image in images:
-
         results.append({
             "imageID": image[0],
             "imageURL": os.path.join(config.IMAGE_DISPLAY_URL, f"{image[1]}.webp"),

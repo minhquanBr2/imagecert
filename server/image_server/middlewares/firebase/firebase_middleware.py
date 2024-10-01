@@ -27,7 +27,6 @@ class FirebaseAuthMiddleware(BaseHTTPMiddleware):
         try:
             token = request.headers.get("authorization").split("Bearer ")[-1]
             print(f"Token: {token[:10]}...{token[-10:]}")
-            print("aaa")
         except:
             return JSONResponse(status_code=401, content={"message": "Authorization token missing"})      
         
@@ -35,19 +34,18 @@ class FirebaseAuthMiddleware(BaseHTTPMiddleware):
 
         try:
             print("Processing request...")
-            print(request)
             print(request.url)
-            print(request.url.path)
             if request.url.path.startswith("/upload"):
-                print(f"Authorization request from user.", auth)
+                print(f"Authorization request from user.")
                 decoded_token = auth.verify_id_token(token, app=get_app("appUserSDK"))
                 print("decode: ", decoded_token)
             else:
                 print(f"Authorization request from admin.")
                 decoded_token = auth.verify_id_token(token, app=get_app("appAdminSDK"))
+                print("decode: ", decoded_token)
             request.state.user = decoded_token
         except Exception as e:
-
+            print(f"Error: {e}")
             return JSONResponse(status_code=401, content=f"Invalid or expired token: {str(e)}")
 
         response = await call_next(request)

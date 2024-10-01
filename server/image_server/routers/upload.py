@@ -27,27 +27,29 @@ async def upload_image(request: Request, signature: str = Form(...), file: Uploa
         if verification_status == config.VERIFICATION_STATUS["ACCEPTED"]:
             perm_filepath = save_webp_image(temp_filepath)
             await save_uploaded_data_to_db(user_uid, original_filename, filename, temp_filepath, signature, verification_status, hash_object, ref_image_ids)
-            return {"message": f"Image {original_filename} registered successfully."}
+            return JSONResponse(status_code=200, content={
+                "data": None,
+                "message": f"Image {original_filename} registered successfully."
+            })
         elif verification_status == config.VERIFICATION_STATUS["PENDING"]:
             perm_filepath = save_webp_image(temp_filepath)
             await save_uploaded_data_to_db(user_uid, original_filename, filename, perm_filepath, signature, verification_status, hash_object, ref_image_ids)
-            return {"message": f"Image {original_filename} is under consideration."}
+            return JSONResponse(status_code=200, content={
+                "data": None,
+                "message": f"Image {original_filename} is under consideration."
+            })
         else:
-            return JSONResponse(status_code=409, content={"message": f"Image {original_filename} is rejected."})
+            return JSONResponse(status_code=409, content={
+                "data": None,
+                "message": f"Image {original_filename} is rejected."
+            })
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        return JSONResponse(status_code=500, content={"message": f"Internal server error: {str(e)}"})
 
 
 @router.get("/get_all")
 async def get_all_images():
     url = f"{config.DB_ENDPOINT_URL}/select/all_images"
     response = requests.get(url)
-    if response.status_code != 200:
-        return {"message": f"Internal server error with status code {response.status_code}."}
-
-    results = response.json()["message"]
-    if len(results) == 0:
-        return {"message": "No images found."}
-
-    return results
+    return JSONResponse(status_code=response.status_code, content=response.json())

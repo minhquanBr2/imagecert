@@ -50,7 +50,7 @@ async def save_verification_status(imageID, admin_uid, result, verificationTimes
         "verification_timestamp": verificationTimestamp
     }
     url = f"{config.DB_ENDPOINT_URL}/insert/verification_status"
-    response = requests.post(url, json = payload)
+    response = requests.post(url, json=payload)
     return response
 
 
